@@ -6,7 +6,7 @@
 
 | 機能 | 内容 |
 |------|------|
-| 投稿 | タイトル、本文、期間（開始日・終了日）、URL、画像（1枚想定）、投稿者情報（Twitterアカウント等を含む可） |
+| 投稿 | タイトル、本文、期間（開始日・終了日）、URL、画像（1枚想定）、**投稿者表示名**・**X（旧Twitter）識別子**（いずれも必須。詳細は [functional-spec.md](./functional-spec.md)） |
 | 一覧 | 投稿内容の一覧表示 |
 | 管理 | 管理者のみ投稿の削除 |
 
@@ -50,6 +50,7 @@ flowchart LR
 |------|----------|----------|
 | フロントエンドのホスティング・実行 | **Vercel** | Next.js をデプロイ。無料枠（Hobby）を前提に利用。帯域・ビルド時間等の上限は [Vercel Pricing](https://vercel.com/pricing) で随時確認。 |
 | データベース・API・認証・ファイル | **Supabase** | PostgreSQL、行単位アクセス制御（RLS）、プロジェクト自動API（PostgREST）、認証（Auth）、オブジェクトストレージ（Storage）。公式: [Supabase](https://supabase.com) |
+| 運用通知（手動 X 投稿の補助） | **Discord**（Incoming Webhook） | 投稿が保存されたあと **Route Handler** 等から Webhook へ通知し、**X にコピペしやすい文案**を受け取る。X の書き込み API は使わない。要件は [functional-spec.md](./functional-spec.md) **FR-17**。Webhook URL は **Vercel の環境変数（非公開）**にのみ格納。 |
 
 ## 採用技術
 
@@ -68,13 +69,17 @@ flowchart LR
 1. **anon（公開）キー**はブラウザに含まれる前提でよいが、**そのキーで可能な操作はRLSで制限**する。
 2. **service_role** キー等の高権限シークレットは**Vercelの環境変数**にのみ格納し、クライアントに載せない。
 3. **CAPTCHA**（例: Cloudflare Turnstile）は、トークン検証を **Next.js の Route Handler** 等で行い、検証成功後のみ Supabase へ書き込みする流れを想定（手間を抑えつつ秘密鍵をサーバ側に置ける）。
-4. **匿名投稿**は許可する一方、歓迎しない投稿の抑止（レート制限、承認制、モデレーション等）は**別途方針を決めてから**実装する。
+4. **投稿時の認証**は [functional-spec.md](./functional-spec.md) **§1.4 案 A**（**ログイン不要**、X 識別子は**フォーム手入力**）とする。歓迎しない投稿の抑止（レート制限、承認制、モデレーション等）は**別途方針を決めてから**実装する。
 
 ## 未確定・別途検討
 
-- 匿名投稿に対するスパム・不適切投稿の具体的な防御・運用（CAPTCHA以外のレイヤ）。
+- スパム・不適切投稿の具体的な防御・運用（CAPTCHA以外のレイヤ）。認証案別の整理は functional-spec を参照。
 - 管理者の定義方法（メールallowlist、ロールテーブル、`user_metadata` 等）。
 - 画像バケットの公開範囲（公開読み取り／署名付きURL等）。
+
+## 関連ドキュメント
+
+- [functional-spec.md](./functional-spec.md) … 機能仕様（ベース）。本アーキテクチャは仕様の確定に応じて更新する場合がある。
 
 ## 参考リンク
 
