@@ -57,6 +57,7 @@ flowchart LR
 | 層 | 技術 | 役割 |
 |----|------|------|
 | フロントエンド | **Next.js**（App Router 想定） | UI、一覧・フォーム、管理者向け操作画面。 |
+| HTTP クライアント | **標準 `fetch`** | **axios は使用しない**（方針）。外部 API（Turnstile 検証・Discord Webhook 等）も `fetch`。 |
 | クライアントからDBへ | **@supabase/supabase-js** | 匿名・ログイン後のクエリ、Storage 操作用。 |
 | 環境変数 | `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` | フロントから接続する公開情報（**実際の権限はRLSで最小化**）。 |
 | データベース | **PostgreSQL**（Supabase管理） | 投稿メタデータ、投稿者情報、画像パス等。 |
