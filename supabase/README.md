@@ -1,5 +1,7 @@
 # Supabase（DB・Storage・RLS）
 
+> **現行プロダクト方針**は [Google フォーム＋スプレッドシート](../doc/static-site-strategy.md) です。本ディレクトリは **旧構成の参考** として残しています（このまま適用しなくてもよい）。
+
 ## マイグレーションの適用
 
 1. [Supabase](https://supabase.com) でプロジェクトを作成する。
@@ -20,11 +22,11 @@ where id = 1;
 - **Authentication → Providers**: マジックリンクまたはパスワードを有効化。
 - **新規ユーザー登録**: 運用方針どおり **一般サインアップを無効**にし、Dashboard から **あなたのユーザのみ** 作成する（[system-architecture.md](../doc/system-architecture.md) 「管理者の認定」参照）。
 
-## 環境変数（Next.js 側）
+## 環境変数（Supabase を使うフロントを置く場合）
 
-プロジェクト設定から **Project URL** と **anon / service_role** キーを取得し、ルートの `.env.local` に設定（`.env.example` 参照）。
+プロジェクト設定から **Project URL** と **anon / service_role** キーを取得し、フロントの環境変数に設定する。
 
 ## Storage
 
 - バケット ID: `event-thumbnails`（公開読み取り、最大 5MB、JPEG/PNG/WebP）。
-- **アップロードはクライアントから anon では行わない**想定（Route Handler が `service_role` でアップロード）。
+- アップロード方針は旧設計（サーバ経由の `service_role` 等）に依存。
