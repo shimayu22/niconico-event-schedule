@@ -3,9 +3,9 @@
 ニコニコ動画「投稿祭」スケジュールを**非公式**に掲載するサイトのリポジトリ（開発中）。
 
 - **現在の方針（静的・フォーム／シート・Astro 予定）**: [doc/static-site-strategy.md](doc/static-site-strategy.md)
-- 機能仕様（旧・Supabase 案）: [doc/functional-spec.md](doc/functional-spec.md)
-- アーキテクチャ（旧・Next + Supabase）: [doc/system-architecture.md](doc/system-architecture.md)
-- DB・RLS（参考・現方針では未使用）: [supabase/README.md](supabase/README.md)
+- 機能仕様（旧・Supabase 案）: [doc/old/functional-spec.md](doc/old/functional-spec.md)
+- アーキテクチャ（旧・Next + Supabase）: [doc/old/system-architecture.md](doc/old/system-architecture.md)
+- DB・RLS（参考・現方針では未使用）: [doc/old/supabase/README.md](doc/old/supabase/README.md)
 
 ## フロントエンド
 
@@ -22,4 +22,4 @@
 | パス | 内容 |
 |------|------|
 | `doc/` | 仕様・日報・**現行方針**（`static-site-strategy.md`） |
-| `supabase/` | 旧構成用マイグレーション（参考。フォーム／シート構成では未使用） |
+| `doc/old/supabase/` | 旧構成用マイグレーション（参考。フォーム／シート構成では未使用） |

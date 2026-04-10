@@ -8,8 +8,8 @@
 
 | ドキュメント | 位置づけ |
 |--------------|----------|
-| [functional-spec.md](./functional-spec.md) | **旧・機能仕様**（Supabase / 自前フォーム / 画像アップロード / Discord 等。**新方針と食い違う箇所あり**） |
-| [system-architecture.md](./system-architecture.md) | **旧・アーキテクチャ**（Next + Supabase 前提の記録） |
+| [functional-spec.md](./old/functional-spec.md) | **旧・機能仕様**（Supabase / 自前フォーム / 画像アップロード / Discord 等。**新方針と食い違う箇所あり**） |
+| [system-architecture.md](./old/system-architecture.md) | **旧・アーキテクチャ**（Next + Supabase 前提の記録） |
 | **本ファイル** | **現在のプロダクト／運用方針の整理**（静的化・シート中心） |
 
 ---
@@ -84,13 +84,13 @@
 | **Astro プロジェクトの置き場所** | リポジトリ**ルート**に置くか **`web/`** などサブディレクトリに置くか。 |
 | **ホスティング** | GitHub Pages / Cloudflare Pages / Vercel（静的）等。 |
 | **利用規約・問い合わせ文言** | 掲載条件・削除依頼・公開範囲の明記。 |
-| **旧資産（`supabase/migrations` 等）** | 採用しない方針なら **アーカイブ**／README に「未使用」と注記するか。
+| **旧資産（`doc/old/supabase/migrations` 等）** | 採用しない方針なら **アーカイブ**／README に「未使用」と注記するか。
 
 ---
 
 ## 4. リポジトリの現状と今後（合意事項）
 
-- **今**：Next.js コードは **撤去済み**。`supabase/migrations` はリポジトリに残っているが、**現方針（フォーム／シート）では未使用**（削除しない／アーカイブ扱いは任意）。
+- **今**：Next.js コードは **撤去済み**。`doc/old/supabase/migrations` はリポジトリに残っているが、**現方針（フォーム／シート）では未使用**（削除しない／アーカイブ扱いは任意）。
 - **方針**：**Astro**（または同等の静的ジェネレータ）でサイト本体を追加する。
 - **ドキュメント**：**機能の正**は当面 **本ファイル＋（フォーム・シート確定後の）追記**。旧 `functional-spec` は**歴史的参照**として残すが、**矛盾する要件は本ファイルを優先**する。
 

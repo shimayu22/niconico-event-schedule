@@ -1,6 +1,6 @@
 # システムアーキテクチャ
 
-> **注意（2026-04）**：**現在のプロダクト方針**は [static-site-strategy.md](./static-site-strategy.md) を参照。本ファイルは **Next.js + Supabase** 前提の**歴史的記録**です（**Next.js はリポジトリから撤去済み**、2026-04）。
+> **注意（2026-04）**：**現在のプロダクト方針**は [static-site-strategy.md](../static-site-strategy.md) を参照。本ファイルは **Next.js + Supabase** 前提の**歴史的記録**です（**Next.js はリポジトリから撤去済み**、2026-04）。
 
 本ドキュメントは、イベント（投稿）の登録・一覧表示・管理者による削除を行うWebアプリについて、これまでの検討結果を前提とした**採用サービスと技術**を整理したものです。
 
@@ -96,7 +96,7 @@ flowchart LR
 
 ## 関連ドキュメント
 
-- [static-site-strategy.md](./static-site-strategy.md) … **静的サイト（Astro 予定）・フォーム／シート中心**の意思決定整理。
+- [static-site-strategy.md](../static-site-strategy.md) … **静的サイト（Astro 予定）・フォーム／シート中心**の意思決定整理。
 - [functional-spec.md](./functional-spec.md) … 機能仕様（旧・Supabase 案。新方針と食い違う箇所あり）。
 
 ## 参考リンク

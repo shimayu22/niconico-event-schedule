@@ -1,6 +1,6 @@
 # Supabase（DB・Storage・RLS）
 
-> **現行プロダクト方針**は [Google フォーム＋スプレッドシート](../doc/static-site-strategy.md) です。本ディレクトリは **旧構成の参考** として残しています（このまま適用しなくてもよい）。
+> **現行プロダクト方針**は [Google フォーム＋スプレッドシート](../../static-site-strategy.md) です。本ディレクトリは **旧構成の参考** として残しています（このまま適用しなくてもよい）。
 
 ## マイグレーションの適用
 
@@ -20,7 +20,7 @@ where id = 1;
 ## Auth 設定（推奨）
 
 - **Authentication → Providers**: マジックリンクまたはパスワードを有効化。
-- **新規ユーザー登録**: 運用方針どおり **一般サインアップを無効**にし、Dashboard から **あなたのユーザのみ** 作成する（[system-architecture.md](../doc/system-architecture.md) 「管理者の認定」参照）。
+- **新規ユーザー登録**: 運用方針どおり **一般サインアップを無効**にし、Dashboard から **あなたのユーザのみ** 作成する（[system-architecture.md](../system-architecture.md) 「管理者の認定」参照）。
 
 ## 環境変数（Supabase を使うフロントを置く場合）
 
