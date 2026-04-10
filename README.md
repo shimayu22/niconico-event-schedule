@@ -2,8 +2,9 @@
 
 ニコニコ動画「投稿祭」スケジュールを**非公式**に掲載するサイトのリポジトリ（開発中）。
 
-- 機能仕様: [doc/functional-spec.md](doc/functional-spec.md)
-- アーキテクチャ: [doc/system-architecture.md](doc/system-architecture.md)
+- **現在の方針（静的・フォーム／シート）**: [doc/static-site-strategy.md](doc/static-site-strategy.md)
+- 機能仕様（旧・Supabase 案）: [doc/functional-spec.md](doc/functional-spec.md)
+- アーキテクチャ（旧・Next + Supabase）: [doc/system-architecture.md](doc/system-architecture.md)
 - DB・RLS: [supabase/README.md](supabase/README.md)
 
 ## 開発環境

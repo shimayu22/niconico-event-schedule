@@ -2,6 +2,8 @@
 
 本ドキュメントは、**ニコニコ動画の「投稿祭」スケジュールを、公式統合サイトに依存せず共有する**ためのWebアプリについて、要求・要件を整理したものです。インフラ・技術は [system-architecture.md](./system-architecture.md) を参照し、仕様確定に応じて両方を更新します。
 
+> **注意（2026-04）**：運用方針として **Google フォーム＋スプレッドシート＋静的フロント（Astro 予定）** へ寄せる検討が進んでいます。**現在の意思決定の整理**は **[static-site-strategy.md](./static-site-strategy.md)** を参照してください。本文の **Supabase・自前フォーム・画像アップロード・Discord Webhook** 等は、リポジトリ足場・旧案として**矛盾する場合があります**。
+
 ---
 
 ## 1. 背景と目的
@@ -255,3 +257,4 @@ PostgreSQL テーブルは実装時に定義する。論理項目は以下。
 | 2026-04-02 | FR-18：一覧はカード＋ページネーション、詳細ページなし。常設相当 URL は `?post=` ディープリンク（FR-17 と整合）。 |
 | 2026-04-02 | 管理者1名：`system-architecture.md` にメール＋RLS＋サインアップ無効化の認定方針を確定記載。 |
 | 2026-04-02 | Next.js 足場・Supabase クライアント・`fetch` のみの HTTP 方針（axios 不使用）。README / `system-architecture.md` 記載。 |
+| 2026-04-04 | 冒頭に注意書き：方針転換の正は [static-site-strategy.md](./static-site-strategy.md)。 |
