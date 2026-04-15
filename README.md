@@ -9,7 +9,7 @@
 
 ## フロントエンド
 
-**Next.js は撤去済み**（2026-04）。以降は [static-site-strategy.md](doc/static-site-strategy.md) に従い **Astro** などで静的サイトを追加する想定です。
+**Next.js は撤去済み**（2026-04）。以降は [static-site-strategy.md](doc/static-site-strategy.md) に従い、サイト本体は **`web/`** に **Astro** で追加する想定です。
 
 ## HTTP クライアント方針（axios 不使用）
 
@@ -22,4 +22,5 @@
 | パス | 内容 |
 |------|------|
 | `doc/` | 仕様・日報・**現行方針**（`static-site-strategy.md`） |
+| `web/` | 静的サイト本体（**Astro 予定**。スキャフォールド後に本表を更新） |
 | `doc/old/supabase/` | 旧構成用マイグレーション（参考。フォーム／シート構成では未使用） |
