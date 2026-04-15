@@ -1,0 +1,89 @@
+---
+import { categoryLabelFromSlug } from "../lib/categories";
+import type { CategorySlug } from "../lib/categories";
+
+interface Props {
+	slugs: CategorySlug[];
+	currentSlug: string | null;
+	basePath: "" | "/ended";
+}
+
+const { slugs, currentSlug, basePath } = Astro.props;
+const allHref = basePath === "/ended" ? "/ended/" : "/";
+const prefix = basePath === "/ended" ? "/ended/category" : "/category";
+const selectId = `category-filter-${basePath === "/ended" ? "ended" : "home"}`;
+---
+
+<div class="category-filter">
+	<label class="category-filter-label-wrap" for={selectId}>
+		<span class="category-filter-label">カテゴリ</span>
+		<select id={selectId} class="category-select">
+			<option value={allHref} selected={currentSlug === null}>
+				すべて
+			</option>
+			{
+				slugs.map((slug) => {
+					const label = categoryLabelFromSlug(slug);
+					if (!label) return null;
+					return (
+						<option value={`${prefix}/${slug}/`} selected={currentSlug === slug}>
+							{label}
+						</option>
+					);
+				})
+			}
+		</select>
+	</label>
+</div>
+
+<script define:vars={{ selectId }}>
+	const sel = document.getElementById(selectId);
+	sel?.addEventListener("change", () => {
+		const v = sel.value;
+		if (v) window.location.href = v;
+	});
+</script>
+
+<style>
+	.category-filter {
+		margin: 0 0 1.25rem;
+	}
+
+	.category-filter-label-wrap {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		max-width: 28rem;
+	}
+
+	.category-filter-label {
+		margin: 0;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--muted);
+		letter-spacing: 0.02em;
+	}
+
+	.category-select {
+		appearance: auto;
+		width: 100%;
+		padding: 0.5rem 0.65rem;
+		font-size: 0.9rem;
+		font-weight: 500;
+		line-height: 1.4;
+		color: var(--text);
+		background: var(--card-bg);
+		border: 1px solid var(--border);
+		border-radius: 8px;
+		cursor: pointer;
+	}
+
+	.category-select:hover {
+		border-color: color-mix(in srgb, var(--link) 35%, var(--border));
+	}
+
+	.category-select:focus-visible {
+		outline: 2px solid var(--link);
+		outline-offset: 2px;
+	}
+</style>

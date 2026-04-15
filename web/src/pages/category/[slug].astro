@@ -1,12 +1,26 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import EventCard from "../components/EventCard.astro";
-import MonthFilter from "../components/MonthFilter.astro";
-import CategoryFilter from "../components/CategoryFilter.astro";
-import { loadEvents } from "../lib/events";
-import { calendarDateJST, isEventEnded } from "../lib/jst-date";
-import { uniqueStartMonthsDescending } from "../lib/start-month";
-import { uniqueCategorySlugsInNiconicoOrder } from "../lib/categories";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import EventCard from "../../components/EventCard.astro";
+import MonthFilter from "../../components/MonthFilter.astro";
+import CategoryFilter from "../../components/CategoryFilter.astro";
+import { loadEvents } from "../../lib/events";
+import { calendarDateJST, isEventEnded } from "../../lib/jst-date";
+import { uniqueStartMonthsDescending } from "../../lib/start-month";
+import {
+	allNiconicoCategorySlugs,
+	categoryLabelFromSlug,
+	eventMatchesCategorySlug,
+	isValidCategorySlug,
+	uniqueCategorySlugsInNiconicoOrder,
+} from "../../lib/categories";
+
+export function getStaticPaths() {
+	return allNiconicoCategorySlugs().map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+const slugSafe =
+	typeof slug === "string" && isValidCategorySlug(slug) ? slug : "";
 
 let allEvents: Awaited<ReturnType<typeof loadEvents>> = [];
 let loadError: string | null = null;
@@ -18,16 +32,28 @@ try {
 }
 
 const todayYmd = calendarDateJST();
-const events = allEvents.filter((e) => !isEventEnded(e, todayYmd));
-const monthsNav = uniqueStartMonthsDescending(events);
-const categorySlugsNav = uniqueCategorySlugsInNiconicoOrder(events);
+const activeEvents = allEvents.filter((e) => !isEventEnded(e, todayYmd));
+const monthsNav = uniqueStartMonthsDescending(activeEvents);
+const categorySlugsNav = uniqueCategorySlugsInNiconicoOrder(activeEvents);
+const events = slugSafe
+	? activeEvents.filter((e) => eventMatchesCategorySlug(e, slugSafe))
+	: [];
 
 const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
+const categoryLabel = slugSafe ? categoryLabelFromSlug(slugSafe) : "";
+const metaTitle = categoryLabel
+	? `${categoryLabel} | 投稿祭スケジュール（非公式）`
+	: "投稿祭スケジュール（非公式）";
 ---
 
 <BaseLayout
-	metaTitle="投稿祭スケジュール（非公式）"
-	pageHeading="投稿祭スケジュール"
+	metaTitle={metaTitle}
+	pageHeading={categoryLabel ? `${categoryLabel}のイベント` : "投稿祭スケジュール"}
+	description={
+		categoryLabel
+			? `カテゴリ「${categoryLabel}」（ニコニコ動画ジャンル相当）の掲載中イベント一覧（非公式）。`
+			: undefined
+	}
 	navCurrent="home"
 >
 	<main id="main" class="main">
@@ -70,7 +96,7 @@ const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
 				!loadError && csvConfigured && categorySlugsNav.length > 0 && (
 					<CategoryFilter
 						slugs={categorySlugsNav}
-						currentSlug={null}
+						currentSlug={slugSafe || null}
 						basePath=""
 					/>
 				)
@@ -86,7 +112,7 @@ const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
 				!loadError &&
 					csvConfigured &&
 					allEvents.length > 0 &&
-					events.length === 0 && (
+					activeEvents.length === 0 && (
 						<div class="banner banner-info">
 							<p class="banner-title">掲載中のイベントはありません</p>
 							<p class="banner-body">
@@ -99,9 +125,24 @@ const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
 			}
 
 			{
+				!loadError &&
+					csvConfigured &&
+					activeEvents.length > 0 &&
+					events.length === 0 &&
+					slugSafe && (
+						<div class="banner banner-info">
+							<p class="banner-title">このカテゴリの掲載中イベントはありません</p>
+							<p class="banner-body">
+								<a href="/">掲載中のイベント一覧（すべて）</a>をご覧ください。
+							</p>
+						</div>
+					)
+			}
+
+			{
 				events.length > 0 && (
 					<p class="count" aria-live="polite">
-						{events.length} 件（掲載日の新しい順 · 終了日翌日以降は非表示）
+						{events.length} 件（{categoryLabel} · 掲載日の新しい順）
 					</p>
 				)
 			}

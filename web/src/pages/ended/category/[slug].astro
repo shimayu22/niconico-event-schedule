@@ -5,28 +5,22 @@ import MonthFilter from "../../../components/MonthFilter.astro";
 import CategoryFilter from "../../../components/CategoryFilter.astro";
 import { loadEvents } from "../../../lib/events";
 import { calendarDateJST, isEventEnded, sortEndedEventsForDisplay } from "../../../lib/jst-date";
+import { uniqueStartMonthsDescending } from "../../../lib/start-month";
 import {
-	eventStartsInMonth,
-	formatStartMonthLabelJa,
-	isValidYm,
-	uniqueStartMonthsDescending,
-} from "../../../lib/start-month";
-import { uniqueCategorySlugsInNiconicoOrder } from "../../../lib/categories";
+	allNiconicoCategorySlugs,
+	categoryLabelFromSlug,
+	eventMatchesCategorySlug,
+	isValidCategorySlug,
+	uniqueCategorySlugsInNiconicoOrder,
+} from "../../../lib/categories";
 
-export async function getStaticPaths() {
-	try {
-		const all = await loadEvents();
-		const todayYmd = calendarDateJST();
-		const ended = all.filter((e) => isEventEnded(e, todayYmd));
-		const months = uniqueStartMonthsDescending(ended);
-		return months.map((ym) => ({ params: { ym } }));
-	} catch {
-		return [];
-	}
+export function getStaticPaths() {
+	return allNiconicoCategorySlugs().map((slug) => ({ params: { slug } }));
 }
 
-const { ym } = Astro.params;
-const ymSafe = typeof ym === "string" && isValidYm(ym) ? ym : "";
+const { slug } = Astro.params;
+const slugSafe =
+	typeof slug === "string" && isValidCategorySlug(slug) ? slug : "";
 
 let allEvents: Awaited<ReturnType<typeof loadEvents>> = [];
 let loadError: string | null = null;
@@ -41,21 +35,23 @@ const todayYmd = calendarDateJST();
 const endedAll = sortEndedEventsForDisplay(allEvents.filter((e) => isEventEnded(e, todayYmd)));
 const monthsNav = uniqueStartMonthsDescending(endedAll);
 const categorySlugsNav = uniqueCategorySlugsInNiconicoOrder(endedAll);
-const events = ymSafe ? endedAll.filter((e) => eventStartsInMonth(e, ymSafe)) : [];
+const events = slugSafe
+	? endedAll.filter((e) => eventMatchesCategorySlug(e, slugSafe))
+	: [];
 
 const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
-const monthLabel = ymSafe ? formatStartMonthLabelJa(ymSafe) : "";
-const metaTitle = ymSafe
-	? `${monthLabel}開始 · 開催終了イベント | 投稿祭スケジュール（非公式）`
+const categoryLabel = slugSafe ? categoryLabelFromSlug(slugSafe) : "";
+const metaTitle = categoryLabel
+	? `${categoryLabel} · 開催終了イベント | 投稿祭スケジュール（非公式）`
 	: "開催終了イベント | 投稿祭スケジュール（非公式）";
 ---
 
 <BaseLayout
 	metaTitle={metaTitle}
-	pageHeading={ymSafe ? `${monthLabel}開始 · 開催終了` : "開催終了イベント"}
+	pageHeading={categoryLabel ? `${categoryLabel} · 開催終了` : "開催終了イベント"}
 	description={
-		ymSafe
-			? `開始日が ${monthLabel}（JST の暦月）の終了済みイベント一覧（非公式）。`
+		categoryLabel
+			? `カテゴリ「${categoryLabel}」の終了済みイベント一覧（非公式）。`
 			: "終了日（JST の暦日）を過ぎた投稿祭・イベントの一覧（非公式）。"
 	}
 	navCurrent="ended"
@@ -86,7 +82,7 @@ const metaTitle = ymSafe
 				!loadError && csvConfigured && categorySlugsNav.length > 0 && (
 					<CategoryFilter
 						slugs={categorySlugsNav}
-						currentSlug={null}
+						currentSlug={slugSafe || null}
 						basePath="/ended"
 					/>
 				)
@@ -94,7 +90,7 @@ const metaTitle = ymSafe
 
 			{
 				!loadError && csvConfigured && monthsNav.length > 0 && (
-					<MonthFilter months={monthsNav} currentYm={ymSafe || null} basePath="/ended" />
+					<MonthFilter months={monthsNav} currentYm={null} basePath="/ended" />
 				)
 			}
 
@@ -123,9 +119,9 @@ const metaTitle = ymSafe
 					csvConfigured &&
 					endedAll.length > 0 &&
 					events.length === 0 &&
-					ymSafe && (
+					slugSafe && (
 						<div class="banner banner-info">
-							<p class="banner-title">この開始月の終了イベントはありません</p>
+							<p class="banner-title">このカテゴリの終了イベントはありません</p>
 							<p class="banner-body">
 								<a href="/ended/">開催終了イベント（すべて）</a>をご覧ください。
 							</p>
@@ -136,7 +132,7 @@ const metaTitle = ymSafe
 			{
 				events.length > 0 && (
 					<p class="count" aria-live="polite">
-						{events.length} 件（{monthLabel}開始 · 終了日の新しい順）
+						{events.length} 件（{categoryLabel} · 終了日の新しい順）
 					</p>
 				)
 			}

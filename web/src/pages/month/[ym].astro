@@ -2,6 +2,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import EventCard from "../../components/EventCard.astro";
 import MonthFilter from "../../components/MonthFilter.astro";
+import CategoryFilter from "../../components/CategoryFilter.astro";
 import { loadEvents } from "../../lib/events";
 import { calendarDateJST, isEventEnded } from "../../lib/jst-date";
 import {
@@ -10,6 +11,7 @@ import {
 	isValidYm,
 	uniqueStartMonthsDescending,
 } from "../../lib/start-month";
+import { uniqueCategorySlugsInNiconicoOrder } from "../../lib/categories";
 
 export async function getStaticPaths() {
 	try {
@@ -38,6 +40,7 @@ try {
 const todayYmd = calendarDateJST();
 const activeEvents = allEvents.filter((e) => !isEventEnded(e, todayYmd));
 const monthsNav = uniqueStartMonthsDescending(activeEvents);
+const categorySlugsNav = uniqueCategorySlugsInNiconicoOrder(activeEvents);
 const events = ymSafe ? activeEvents.filter((e) => eventStartsInMonth(e, ymSafe)) : [];
 
 const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
@@ -89,6 +92,16 @@ const metaTitle = ymSafe
 							</p>
 						</div>
 					)
+			}
+
+			{
+				!loadError && csvConfigured && categorySlugsNav.length > 0 && (
+					<CategoryFilter
+						slugs={categorySlugsNav}
+						currentSlug={null}
+						basePath=""
+					/>
+				)
 			}
 
 			{
