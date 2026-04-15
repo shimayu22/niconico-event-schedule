@@ -9,7 +9,11 @@
 
 ## フロントエンド
 
-**Next.js は撤去済み**（2026-04）。以降は [static-site-strategy.md](doc/static-site-strategy.md) に従い、サイト本体は **`web/`** に **Astro** で追加する想定です。
+**Next.js は撤去済み**（2026-04）。サイト本体は **`web/`** の **Astro**（[static-site-strategy.md](doc/static-site-strategy.md)）。
+
+### デプロイ（GitHub Pages）
+
+`.github/workflows/deploy-web.yml` が **main への push**・**毎日定時**・**手動（workflow_dispatch）** で `web/` をビルドして Pages に公開します。リポジトリの **Settings → Secrets and variables → Actions** に `PUBLIC_EVENTS_CSV_URL`（公開 CSV の URL）を登録し、**Settings → Pages** の Source を **GitHub Actions** にしてください。プロジェクトサイト（`https://user.github.io/repo/`）の場合は `web/astro.config.mjs` に `base: '/リポジトリ名/'` が必要になることがあります。
 
 ## HTTP クライアント方針（axios 不使用）
 

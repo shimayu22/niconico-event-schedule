@@ -1,0 +1,81 @@
+---
+interface Props {
+	current?: "home" | "ended" | "terms";
+}
+
+const { current } = Astro.props;
+---
+
+<nav class="site-nav" aria-label="サイト内メニュー">
+	<ul class="site-nav-list">
+		<li>
+			<a href="/" class:list={{ "is-current": current === "home" }} aria-current={current === "home" ? "page" : undefined}>
+				掲載中のイベント
+			</a>
+		</li>
+		<li>
+			<a
+				href="/ended/"
+				class:list={{ "is-current": current === "ended" }}
+				aria-current={current === "ended" ? "page" : undefined}
+			>
+				開催終了イベント
+			</a>
+		</li>
+		<li>
+			<a href="/terms/" class:list={{ "is-current": current === "terms" }} aria-current={current === "terms" ? "page" : undefined}>
+				利用規約
+			</a>
+		</li>
+		<li>
+			<span class="nav-soon" title="今後追加予定">投稿フォーム（準備中）</span>
+		</li>
+	</ul>
+</nav>
+
+<style>
+	.site-nav {
+		margin-top: 1rem;
+		padding-top: 0.85rem;
+		border-top: 1px solid var(--border);
+	}
+
+	.site-nav-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem 1rem;
+		align-items: center;
+		font-size: 0.875rem;
+	}
+
+	.site-nav-list a {
+		color: var(--link);
+		text-decoration: none;
+		font-weight: 500;
+		border-bottom: 1px solid transparent;
+	}
+
+	.site-nav-list a:hover {
+		border-bottom-color: color-mix(in srgb, var(--link) 45%, transparent);
+	}
+
+	.site-nav-list a:focus-visible {
+		outline: 2px solid var(--link);
+		outline-offset: 2px;
+		border-radius: 2px;
+	}
+
+	.site-nav-list a.is-current {
+		color: var(--text);
+		font-weight: 650;
+		border-bottom-color: var(--muted);
+	}
+
+	.nav-soon {
+		color: var(--muted);
+		cursor: default;
+	}
+</style>

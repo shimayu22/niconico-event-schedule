@@ -1,0 +1,87 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import EventCard from "../../components/EventCard.astro";
+import { loadEvents } from "../../lib/events";
+import { calendarDateJST, isEventEnded, sortEndedEventsForDisplay } from "../../lib/jst-date";
+
+let allEvents: Awaited<ReturnType<typeof loadEvents>> = [];
+let loadError: string | null = null;
+
+try {
+	allEvents = await loadEvents();
+} catch (e) {
+	loadError = e instanceof Error ? e.message : String(e);
+}
+
+const todayYmd = calendarDateJST();
+const events = sortEndedEventsForDisplay(allEvents.filter((e) => isEventEnded(e, todayYmd)));
+
+const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
+---
+
+<BaseLayout
+	metaTitle="開催終了イベント | 投稿祭スケジュール（非公式）"
+	pageHeading="開催終了イベント"
+	description="終了日（JST の暦日）を過ぎた投稿祭・イベントの一覧（非公式）。"
+	navCurrent="ended"
+>
+	<main id="main" class="main">
+		<div class="inner">
+			{
+				loadError && (
+					<div class="banner banner-error" role="alert">
+						<p class="banner-title">データを読み込めませんでした</p>
+						<p class="banner-body">{loadError}</p>
+					</div>
+				)
+			}
+
+			{
+				!loadError && !csvConfigured && (
+					<div class="banner banner-info">
+						<p class="banner-title">CSV の URL が未設定です</p>
+						<p class="banner-body">
+							ビルド環境の <code>PUBLIC_EVENTS_CSV_URL</code> を設定してください。
+						</p>
+					</div>
+				)
+			}
+
+			{
+				!loadError && csvConfigured && allEvents.length > 0 && events.length === 0 && (
+					<div class="banner banner-info">
+						<p class="banner-title">開催終了の掲載はまだありません</p>
+						<p class="banner-body">
+							<a href="/">掲載中のイベント一覧</a>をご覧ください。
+						</p>
+					</div>
+				)
+			}
+
+			{
+				!loadError && csvConfigured && allEvents.length === 0 && (
+					<div class="banner banner-info">
+						<p class="banner-title">表示する行がありません</p>
+						<p class="banner-body">CSV の内容を確認してください。</p>
+					</div>
+				)
+			}
+
+			{
+				events.length > 0 && (
+					<p class="count" aria-live="polite">
+						{events.length} 件（終了日の新しい順 · 同一終了日では掲載日時の新しい順）
+					</p>
+				)
+			}
+
+			<ul class="grid" role="list">
+				{events.map((event) => (
+					<li class="grid-item" role="listitem">
+						<EventCard event={event} />
+					</li>
+				))}
+			</ul>
+		</div>
+	</main>
+</BaseLayout>

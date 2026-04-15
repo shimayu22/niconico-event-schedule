@@ -1,0 +1,183 @@
+---
+import SiteNav from "../components/SiteNav.astro";
+
+interface Props {
+	metaTitle: string;
+	pageHeading: string;
+	description?: string;
+	mainId?: string;
+	navCurrent?: "home" | "ended" | "terms";
+}
+
+const {
+	metaTitle,
+	pageHeading,
+	description = "ニコニコの投稿祭・イベント情報の非公式一覧。データは公開スプレッドシート由来です。",
+	mainId = "main",
+	navCurrent,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="ja">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{metaTitle}</title>
+		<meta name="description" content={description} />
+	</head>
+	<body>
+		<a class="skip" href={`#${mainId}`}>本文へスキップ</a>
+		<header class="site-header">
+			<div class="inner">
+				<h1 class="site-title">{pageHeading}</h1>
+				<p class="site-tag">非公式 · データは公開 CSV（掲載用シート）から取得</p>
+				<SiteNav current={navCurrent} />
+			</div>
+		</header>
+		<slot />
+	</body>
+</html>
+
+<style is:global>
+	:root {
+		color-scheme: light dark;
+		--bg: light-dark(#f6f7f9, #121418);
+		--text: light-dark(#111318, #eef0f4);
+		--muted: light-dark(#5c6370, #9aa3b2);
+		--card-bg: light-dark(#fff, #1a1e24);
+		--border: light-dark(#e2e5eb, #2c323c);
+		--link: light-dark(#0b57d0, #8ab4f8);
+		--banner-info-bg: light-dark(#e8f0fe, #1a2a44);
+		--banner-error-bg: light-dark(#fce8e6, #3c1f1f);
+		--banner-error-text: light-dark(#611a15, #f9dedc);
+		font-family:
+			system-ui,
+			-apple-system,
+			"Segoe UI",
+			"Hiragino Sans",
+			"Hiragino Kaku Gothic ProN",
+			"Noto Sans JP",
+			sans-serif;
+		line-height: 1.5;
+	}
+
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	body {
+		margin: 0;
+		min-height: 100vh;
+		background: var(--bg);
+		color: var(--text);
+	}
+
+	code {
+		font-size: 0.88em;
+		padding: 0.12em 0.35em;
+		border-radius: 4px;
+		background: light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.08));
+	}
+
+	.skip {
+		position: absolute;
+		left: -9999px;
+		top: 0;
+		padding: 0.5rem 1rem;
+		background: var(--text);
+		color: var(--bg);
+		z-index: 100;
+	}
+
+	.skip:focus {
+		left: 0.5rem;
+		top: 0.5rem;
+	}
+</style>
+
+<style>
+	.site-header {
+		border-bottom: 1px solid var(--border);
+		background: var(--card-bg);
+	}
+
+	.inner {
+		max-width: 960px;
+		margin: 0 auto;
+		padding: 1.25rem 1.25rem 1.5rem;
+	}
+
+	.site-title {
+		margin: 0;
+		font-size: 1.35rem;
+		font-weight: 700;
+		letter-spacing: 0.02em;
+	}
+
+	.site-tag {
+		margin: 0.35rem 0 0;
+		font-size: 0.875rem;
+		color: var(--muted);
+	}
+
+	.main .inner {
+		max-width: 960px;
+		margin: 0 auto;
+		padding: 1.5rem 1.25rem 2.5rem;
+	}
+
+	.banner {
+		border-radius: 10px;
+		padding: 1rem 1.15rem;
+		margin-bottom: 1.25rem;
+		border: 1px solid var(--border);
+	}
+
+	.banner-info {
+		background: var(--banner-info-bg);
+	}
+
+	.banner-error {
+		background: var(--banner-error-bg);
+		color: var(--banner-error-text);
+		border-color: color-mix(in srgb, var(--banner-error-text) 25%, var(--border));
+	}
+
+	.banner-title {
+		margin: 0 0 0.35rem;
+		font-weight: 650;
+		font-size: 0.95rem;
+	}
+
+	.banner-body {
+		margin: 0;
+		font-size: 0.875rem;
+	}
+
+	.count {
+		margin: 0 0 1rem;
+		font-size: 0.875rem;
+		color: var(--muted);
+	}
+
+	.grid {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 1rem;
+		grid-template-columns: 1fr;
+	}
+
+	@media (min-width: 640px) {
+		.grid {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+</style>

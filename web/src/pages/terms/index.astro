@@ -1,0 +1,42 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+	metaTitle="利用規約 | 投稿祭スケジュール（非公式）"
+	pageHeading="利用規約"
+	description="投稿祭スケジュール（非公式）の利用規約。現在は準備中です。"
+	navCurrent="terms"
+>
+	<main id="main" class="main">
+		<div class="inner">
+			<p class="terms-lead">利用規約の本文は準備中です。</p>
+			<p class="terms-back">
+				<a href="/">トップに戻る</a>
+			</p>
+		</div>
+	</main>
+</BaseLayout>
+
+<style>
+	.terms-lead {
+		margin: 0 0 1rem;
+		font-size: 0.95rem;
+	}
+
+	.terms-back {
+		margin: 0;
+		font-size: 0.875rem;
+	}
+
+	.terms-back a {
+		color: var(--link);
+		font-weight: 500;
+		text-decoration: none;
+		border-bottom: 1px solid transparent;
+	}
+
+	.terms-back a:hover {
+		border-bottom-color: color-mix(in srgb, var(--link) 45%, transparent);
+	}
+</style>
