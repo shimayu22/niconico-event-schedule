@@ -11,9 +11,11 @@
 
 **Next.js は撤去済み**（2026-04）。サイト本体は **`web/`** の **Astro**（[static-site-strategy.md](doc/static-site-strategy.md)）。
 
-### デプロイ（GitHub Pages）
+### デプロイ（方針：Cloudflare Pages + GitHub 非公開）
 
-`.github/workflows/deploy-web.yml` が **main への push**・**毎日定時**・**手動（workflow_dispatch）** で `web/` をビルドして Pages に公開します。リポジトリの **Settings → Secrets and variables → Actions** に `PUBLIC_EVENTS_CSV_URL`（公開 CSV の URL）を登録し、**Settings → Pages** の Source を **GitHub Actions** にしてください。プロジェクトサイト（`https://user.github.io/repo/`）の場合は `web/astro.config.mjs` に `base: '/リポジトリ名/'` が必要になることがあります。
+**本番ホスティング**は [doc/static-site-strategy.md](doc/static-site-strategy.md) **§2.8** のとおり **Cloudflare Pages** とし、**GitHub リポジトリは非公開（private）** を前提にします。ビルド時に **`PUBLIC_EVENTS_CSV_URL`**（公開 CSV の URL）を Pages 側の環境変数で渡してください。
+
+**移行未了**：`.github/workflows/deploy-web.yml` は **GitHub Pages 向け**のままです。Cloudflare の **Git 連携**に切り替えるか、Actions から Wrangler 等で Pages へデプロイするか決めたうえで、本 README とワークフローを更新します。プロジェクトサイト形式で GitHub Pages に載せる場合は `web/astro.config.mjs` の `base` が必要になることがあります（Cloudflare 側の URL 構成に合わせて調整）。
 
 ## HTTP クライアント方針（axios 不使用）
 
