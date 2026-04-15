@@ -1,0 +1,123 @@
+---
+import type { EventRow } from "../lib/events";
+
+interface Props {
+	event: EventRow;
+}
+
+const { event } = Astro.props;
+
+const publishedDisplay = (() => {
+	const d = new Date(event.publishedAt);
+	if (Number.isNaN(d.getTime())) return event.publishedAt;
+	return new Intl.DateTimeFormat("ja-JP", {
+		dateStyle: "medium",
+		timeStyle: "short",
+		timeZone: "Asia/Tokyo",
+	}).format(d);
+})();
+---
+
+<article class="card">
+	<h2 class="title">{event.eventName}</h2>
+	<p class="meta">
+		<span class="submitter">{event.submitterName}</span>
+		<span class="sep" aria-hidden="true">·</span>
+		<span class="category">{event.category}</span>
+	</p>
+	<p class="dates">
+		<time datetime={event.startDate}>{event.startDate}</time>
+		<span class="range" aria-hidden="true">〜</span>
+		<time datetime={event.endDate}>{event.endDate}</time>
+	</p>
+	<p class="published"><span class="label">掲載日時</span> {publishedDisplay}</p>
+	<div class="links">
+		<a class="link link-nico" href={event.niconicoUrl} target="_blank" rel="noopener noreferrer">
+			ニコニコで見る
+		</a>
+		{
+			event.xUrl && event.xHandle && (
+				<a class="link link-x" href={event.xUrl} target="_blank" rel="noopener noreferrer">
+					X @{event.xHandle}
+				</a>
+			)
+		}
+	</div>
+</article>
+
+<style>
+	.card {
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		padding: 1.25rem 1.35rem;
+		background: var(--card-bg);
+		box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		min-height: 0;
+	}
+
+	.title {
+		font-size: 1.05rem;
+		font-weight: 650;
+		line-height: 1.45;
+		margin: 0;
+		color: var(--text);
+	}
+
+	.meta {
+		margin: 0;
+		font-size: 0.875rem;
+		color: var(--muted);
+	}
+
+	.sep {
+		margin: 0 0.35rem;
+	}
+
+	.dates {
+		margin: 0;
+		font-size: 0.9rem;
+		color: var(--text);
+	}
+
+	.range {
+		margin: 0 0.25rem;
+	}
+
+	.published {
+		margin: 0;
+		font-size: 0.8rem;
+		color: var(--muted);
+	}
+
+	.label {
+		font-weight: 500;
+	}
+
+	.links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.65rem;
+		margin-top: 0.35rem;
+	}
+
+	.link {
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--link);
+		text-decoration: none;
+		border-bottom: 1px solid transparent;
+	}
+
+	.link:hover {
+		border-bottom-color: color-mix(in srgb, var(--link) 45%, transparent);
+	}
+
+	.link:focus-visible {
+		outline: 2px solid var(--link);
+		outline-offset: 2px;
+		border-radius: 2px;
+	}
+</style>
