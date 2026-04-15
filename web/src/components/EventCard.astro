@@ -19,6 +19,26 @@ const publishedDisplay = (() => {
 ---
 
 <article class="card">
+	<div class="thumb-wrap">
+		{
+			event.thumbnailUrl ? (
+				<img
+					class="thumb"
+					src={event.thumbnailUrl}
+					alt=""
+					width="360"
+					height="270"
+					loading="lazy"
+					decoding="async"
+				/>
+			) : (
+				<div class="thumb-placeholder">
+					<span class="thumb-placeholder-text">サムネイルなし</span>
+				</div>
+			)
+		}
+	</div>
+	<div class="card-body">
 	<h2 class="title">{event.eventName}</h2>
 	<p class="meta">
 		<span class="submitter">{event.submitterName}</span>
@@ -43,19 +63,61 @@ const publishedDisplay = (() => {
 			)
 		}
 	</div>
+	</div>
 </article>
 
 <style>
 	.card {
 		border: 1px solid var(--border);
 		border-radius: 12px;
-		padding: 1.25rem 1.35rem;
+		padding: 0;
+		overflow: hidden;
 		background: var(--card-bg);
 		box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
 		min-height: 0;
+	}
+
+	.thumb-wrap {
+		/* .L サムネは 360×270（4:3）。カード全幅に引き伸ばさずネイティブ解像度付近で表示してぼやけを抑える */
+		aspect-ratio: 4 / 3;
+		width: 100%;
+		max-width: 360px;
+		margin-inline: auto;
+		background: light-dark(#e8eaef, #252a32);
+		position: relative;
+	}
+
+	.thumb {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.thumb-placeholder {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		height: 100%;
+		min-height: 7rem;
+		color: var(--muted);
+		font-size: 0.8rem;
+	}
+
+	.thumb-placeholder-text {
+		padding: 0.5rem 0.75rem;
+		border-radius: 6px;
+		background: light-dark(rgb(0 0 0 / 0.05), rgb(255 255 255 / 0.06));
+	}
+
+	.card-body {
+		padding: 1.25rem 1.35rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
 	}
 
 	.title {

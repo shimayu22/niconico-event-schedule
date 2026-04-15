@@ -1,4 +1,5 @@
 import Papa from "papaparse";
+import { fetchNiconicoThumbnailUrl, niconicoContentIdFromWatchUrl } from "./niconico-thumb";
 import { normalizeNiconicoUrl, normalizeXHandle, xProfileUrl } from "./normalize";
 
 export type EventRow = {
@@ -9,6 +10,7 @@ export type EventRow = {
 	xHandle: string | null;
 	xUrl: string | null;
 	niconicoUrl: string;
+	thumbnailUrl: string | null;
 	startDate: string;
 	endDate: string;
 	category: string;
@@ -56,10 +58,30 @@ function mapRawRow(raw: Record<string, string>): EventRow | null {
 		xHandle,
 		xUrl: xHandle ? xProfileUrl(xHandle) : null,
 		niconicoUrl,
+		thumbnailUrl: null,
 		startDate,
 		endDate,
 		category,
 	};
+}
+
+async function attachThumbnails(rows: EventRow[]): Promise<void> {
+	const cache = new Map<string, string | null>();
+
+	const getForContentId = async (contentId: string): Promise<string | null> => {
+		const hit = cache.get(contentId);
+		if (hit !== undefined) return hit;
+		const thumb = await fetchNiconicoThumbnailUrl(contentId);
+		cache.set(contentId, thumb);
+		return thumb;
+	};
+
+	await Promise.all(
+		rows.map(async (row) => {
+			const cid = niconicoContentIdFromWatchUrl(row.niconicoUrl);
+			row.thumbnailUrl = cid ? await getForContentId(cid) : null;
+		}),
+	);
 }
 
 export async function loadEvents(): Promise<EventRow[]> {
@@ -99,6 +121,8 @@ export async function loadEvents(): Promise<EventRow[]> {
 		if (nb) return -1;
 		return tb - ta;
 	});
+
+	await attachThumbnails(rows);
 
 	return rows;
 }
