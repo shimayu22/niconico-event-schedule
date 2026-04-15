@@ -1,8 +1,10 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import EventCard from "../../components/EventCard.astro";
+import MonthFilter from "../../components/MonthFilter.astro";
 import { loadEvents } from "../../lib/events";
 import { calendarDateJST, isEventEnded, sortEndedEventsForDisplay } from "../../lib/jst-date";
+import { uniqueStartMonthsDescending } from "../../lib/start-month";
 
 let allEvents: Awaited<ReturnType<typeof loadEvents>> = [];
 let loadError: string | null = null;
@@ -15,6 +17,7 @@ try {
 
 const todayYmd = calendarDateJST();
 const events = sortEndedEventsForDisplay(allEvents.filter((e) => isEventEnded(e, todayYmd)));
+const monthsNav = uniqueStartMonthsDescending(events);
 
 const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
 ---
@@ -44,6 +47,12 @@ const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
 							ビルド環境の <code>PUBLIC_EVENTS_CSV_URL</code> を設定してください。
 						</p>
 					</div>
+				)
+			}
+
+			{
+				!loadError && csvConfigured && monthsNav.length > 0 && (
+					<MonthFilter months={monthsNav} currentYm={null} basePath="/ended" />
 				)
 			}
 

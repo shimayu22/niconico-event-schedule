@@ -1,0 +1,95 @@
+---
+import { formatStartMonthLabelJa } from "../lib/start-month";
+
+interface Props {
+	months: string[];
+	currentYm: string | null;
+	basePath: "" | "/ended";
+}
+
+const { months, currentYm, basePath } = Astro.props;
+const prefix = basePath === "/ended" ? "/ended/month" : "/month";
+const allHref = basePath === "/ended" ? "/ended/" : "/";
+---
+
+<nav class="month-filter" aria-label="開始月で絞り込み">
+	<p class="month-filter-label">開始月</p>
+	<ul class="month-filter-list">
+		<li>
+			<a
+				href={allHref}
+				class:list={{ "is-current": currentYm === null }}
+				aria-current={currentYm === null ? "page" : undefined}
+			>
+				すべて
+			</a>
+		</li>
+		{
+			months.map((ym) => (
+				<li>
+					<a
+						href={`${prefix}/${ym}/`}
+						class:list={{ "is-current": currentYm === ym }}
+						aria-current={currentYm === ym ? "page" : undefined}
+					>
+						{formatStartMonthLabelJa(ym)}
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</nav>
+
+<style>
+	.month-filter {
+		margin: 0 0 1.25rem;
+	}
+
+	.month-filter-label {
+		margin: 0 0 0.4rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--muted);
+		text-transform: none;
+		letter-spacing: 0.02em;
+	}
+
+	.month-filter-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem 0.5rem;
+		align-items: center;
+	}
+
+	.month-filter-list a {
+		display: inline-block;
+		padding: 0.28rem 0.65rem;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		color: var(--link);
+		text-decoration: none;
+		border-radius: 999px;
+		border: 1px solid color-mix(in srgb, var(--border) 85%, var(--link));
+		background: var(--card-bg);
+	}
+
+	.month-filter-list a:hover {
+		border-color: color-mix(in srgb, var(--link) 40%, var(--border));
+		background: light-dark(rgb(0 0 0 / 0.03), rgb(255 255 255 / 0.05));
+	}
+
+	.month-filter-list a:focus-visible {
+		outline: 2px solid var(--link);
+		outline-offset: 2px;
+	}
+
+	.month-filter-list a.is-current {
+		color: var(--text);
+		font-weight: 650;
+		border-color: var(--muted);
+		background: light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.08));
+	}
+</style>

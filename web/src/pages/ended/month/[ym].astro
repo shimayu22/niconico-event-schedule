@@ -1,0 +1,140 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import EventCard from "../../../components/EventCard.astro";
+import MonthFilter from "../../../components/MonthFilter.astro";
+import { loadEvents } from "../../../lib/events";
+import { calendarDateJST, isEventEnded, sortEndedEventsForDisplay } from "../../../lib/jst-date";
+import {
+	eventStartsInMonth,
+	formatStartMonthLabelJa,
+	isValidYm,
+	uniqueStartMonthsDescending,
+} from "../../../lib/start-month";
+
+export async function getStaticPaths() {
+	try {
+		const all = await loadEvents();
+		const todayYmd = calendarDateJST();
+		const ended = all.filter((e) => isEventEnded(e, todayYmd));
+		const months = uniqueStartMonthsDescending(ended);
+		return months.map((ym) => ({ params: { ym } }));
+	} catch {
+		return [];
+	}
+}
+
+const { ym } = Astro.params;
+const ymSafe = typeof ym === "string" && isValidYm(ym) ? ym : "";
+
+let allEvents: Awaited<ReturnType<typeof loadEvents>> = [];
+let loadError: string | null = null;
+
+try {
+	allEvents = await loadEvents();
+} catch (e) {
+	loadError = e instanceof Error ? e.message : String(e);
+}
+
+const todayYmd = calendarDateJST();
+const endedAll = sortEndedEventsForDisplay(allEvents.filter((e) => isEventEnded(e, todayYmd)));
+const monthsNav = uniqueStartMonthsDescending(endedAll);
+const events = ymSafe ? endedAll.filter((e) => eventStartsInMonth(e, ymSafe)) : [];
+
+const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
+const monthLabel = ymSafe ? formatStartMonthLabelJa(ymSafe) : "";
+const metaTitle = ymSafe
+	? `${monthLabel}開始 · 開催終了イベント | 投稿祭スケジュール（非公式）`
+	: "開催終了イベント | 投稿祭スケジュール（非公式）";
+---
+
+<BaseLayout
+	metaTitle={metaTitle}
+	pageHeading={ymSafe ? `${monthLabel}開始 · 開催終了` : "開催終了イベント"}
+	description={
+		ymSafe
+			? `開始日が ${monthLabel}（JST の暦月）の終了済みイベント一覧（非公式）。`
+			: "終了日（JST の暦日）を過ぎた投稿祭・イベントの一覧（非公式）。"
+	}
+	navCurrent="ended"
+>
+	<main id="main" class="main">
+		<div class="inner">
+			{
+				loadError && (
+					<div class="banner banner-error" role="alert">
+						<p class="banner-title">データを読み込めませんでした</p>
+						<p class="banner-body">{loadError}</p>
+					</div>
+				)
+			}
+
+			{
+				!loadError && !csvConfigured && (
+					<div class="banner banner-info">
+						<p class="banner-title">CSV の URL が未設定です</p>
+						<p class="banner-body">
+							ビルド環境の <code>PUBLIC_EVENTS_CSV_URL</code> を設定してください。
+						</p>
+					</div>
+				)
+			}
+
+			{
+				!loadError && csvConfigured && monthsNav.length > 0 && (
+					<MonthFilter months={monthsNav} currentYm={ymSafe || null} basePath="/ended" />
+				)
+			}
+
+			{
+				!loadError && csvConfigured && allEvents.length > 0 && endedAll.length === 0 && (
+					<div class="banner banner-info">
+						<p class="banner-title">開催終了の掲載はまだありません</p>
+						<p class="banner-body">
+							<a href="/">掲載中のイベント一覧</a>をご覧ください。
+						</p>
+					</div>
+				)
+			}
+
+			{
+				!loadError && csvConfigured && allEvents.length === 0 && (
+					<div class="banner banner-info">
+						<p class="banner-title">表示する行がありません</p>
+						<p class="banner-body">CSV の内容を確認してください。</p>
+					</div>
+				)
+			}
+
+			{
+				!loadError &&
+					csvConfigured &&
+					endedAll.length > 0 &&
+					events.length === 0 &&
+					ymSafe && (
+						<div class="banner banner-info">
+							<p class="banner-title">この開始月の終了イベントはありません</p>
+							<p class="banner-body">
+								<a href="/ended/">開催終了イベント（すべて）</a>をご覧ください。
+							</p>
+						</div>
+					)
+			}
+
+			{
+				events.length > 0 && (
+					<p class="count" aria-live="polite">
+						{events.length} 件（{monthLabel}開始 · 終了日の新しい順）
+					</p>
+				)
+			}
+
+			<ul class="grid" role="list">
+				{events.map((event) => (
+					<li class="grid-item" role="listitem">
+						<EventCard event={event} />
+					</li>
+				))}
+			</ul>
+		</div>
+	</main>
+</BaseLayout>

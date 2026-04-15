@@ -1,10 +1,30 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import EventCard from "../components/EventCard.astro";
-import MonthFilter from "../components/MonthFilter.astro";
-import { loadEvents } from "../lib/events";
-import { calendarDateJST, isEventEnded } from "../lib/jst-date";
-import { uniqueStartMonthsDescending } from "../lib/start-month";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import EventCard from "../../components/EventCard.astro";
+import MonthFilter from "../../components/MonthFilter.astro";
+import { loadEvents } from "../../lib/events";
+import { calendarDateJST, isEventEnded } from "../../lib/jst-date";
+import {
+	eventStartsInMonth,
+	formatStartMonthLabelJa,
+	isValidYm,
+	uniqueStartMonthsDescending,
+} from "../../lib/start-month";
+
+export async function getStaticPaths() {
+	try {
+		const all = await loadEvents();
+		const todayYmd = calendarDateJST();
+		const active = all.filter((e) => !isEventEnded(e, todayYmd));
+		const months = uniqueStartMonthsDescending(active);
+		return months.map((ym) => ({ params: { ym } }));
+	} catch {
+		return [];
+	}
+}
+
+const { ym } = Astro.params;
+const ymSafe = typeof ym === "string" && isValidYm(ym) ? ym : "";
 
 let allEvents: Awaited<ReturnType<typeof loadEvents>> = [];
 let loadError: string | null = null;
@@ -16,15 +36,23 @@ try {
 }
 
 const todayYmd = calendarDateJST();
-const events = allEvents.filter((e) => !isEventEnded(e, todayYmd));
-const monthsNav = uniqueStartMonthsDescending(events);
+const activeEvents = allEvents.filter((e) => !isEventEnded(e, todayYmd));
+const monthsNav = uniqueStartMonthsDescending(activeEvents);
+const events = ymSafe ? activeEvents.filter((e) => eventStartsInMonth(e, ymSafe)) : [];
 
 const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
+const monthLabel = ymSafe ? formatStartMonthLabelJa(ymSafe) : "";
+const metaTitle = ymSafe
+	? `${monthLabel}開始のイベント | 投稿祭スケジュール（非公式）`
+	: "投稿祭スケジュール（非公式）";
 ---
 
 <BaseLayout
-	metaTitle="投稿祭スケジュール（非公式）"
-	pageHeading="投稿祭スケジュール"
+	metaTitle={metaTitle}
+	pageHeading={ymSafe ? `${monthLabel}開始のイベント` : "投稿祭スケジュール"}
+	description={ymSafe
+		? `開始日が ${monthLabel}（JST の暦月）の掲載中イベント一覧（非公式）。`
+		: undefined}
 	navCurrent="home"
 >
 	<main id="main" class="main">
@@ -65,7 +93,7 @@ const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
 
 			{
 				!loadError && csvConfigured && monthsNav.length > 0 && (
-					<MonthFilter months={monthsNav} currentYm={null} basePath="" />
+					<MonthFilter months={monthsNav} currentYm={ymSafe || null} basePath="" />
 				)
 			}
 
@@ -73,7 +101,7 @@ const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
 				!loadError &&
 					csvConfigured &&
 					allEvents.length > 0 &&
-					events.length === 0 && (
+					activeEvents.length === 0 && (
 						<div class="banner banner-info">
 							<p class="banner-title">掲載中のイベントはありません</p>
 							<p class="banner-body">
@@ -86,9 +114,24 @@ const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
 			}
 
 			{
+				!loadError &&
+					csvConfigured &&
+					activeEvents.length > 0 &&
+					events.length === 0 &&
+					ymSafe && (
+						<div class="banner banner-info">
+							<p class="banner-title">この開始月の掲載中イベントはありません</p>
+							<p class="banner-body">
+								<a href="/">掲載中のイベント一覧（すべて）</a>をご覧ください。
+							</p>
+						</div>
+					)
+			}
+
+			{
 				events.length > 0 && (
 					<p class="count" aria-live="polite">
-						{events.length} 件（掲載日の新しい順 · 終了日翌日以降は非表示）
+						{events.length} 件（{monthLabel}開始 · 掲載日の新しい順）
 					</p>
 				)
 			}
