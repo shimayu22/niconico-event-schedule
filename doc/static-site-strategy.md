@@ -11,6 +11,7 @@
 | [functional-spec.md](./old/functional-spec.md) | **旧・機能仕様**（Supabase / 自前フォーム / 画像アップロード / Discord 等。**新方針と食い違う箇所あり**） |
 | [system-architecture.md](./old/system-architecture.md) | **旧・アーキテクチャ**（Next + Supabase 前提の記録） |
 | **本ファイル** | **現在のプロダクト／運用方針の整理**（静的化・シート中心） |
+| [本番初回セットアップ手順.md](./本番初回セットアップ手順.md) | **本番の初回設定**（Cloudflare / GitHub / スプレッドシート / ムームードメイン） |
 
 ---
 
