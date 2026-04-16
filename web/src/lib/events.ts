@@ -112,6 +112,9 @@ export async function loadEvents(): Promise<EventRow[]> {
 	}
 
 	rows.sort((a, b) => {
+		if (a.startDate !== b.startDate) {
+			return a.startDate < b.startDate ? 1 : -1;
+		}
 		const ta = Date.parse(a.publishedAt);
 		const tb = Date.parse(b.publishedAt);
 		const na = Number.isNaN(ta);

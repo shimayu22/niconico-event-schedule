@@ -4,7 +4,7 @@ import EventCard from "../../components/EventCard.astro";
 import MonthFilter from "../../components/MonthFilter.astro";
 import CategoryFilter from "../../components/CategoryFilter.astro";
 import { loadEvents } from "../../lib/events";
-import { calendarDateJST, isEventEnded } from "../../lib/jst-date";
+import { calendarDateJST, isEventOngoing } from "../../lib/jst-date";
 import { uniqueStartMonthsDescending } from "../../lib/start-month";
 import {
 	allNiconicoCategorySlugs,
@@ -32,7 +32,7 @@ try {
 }
 
 const todayYmd = calendarDateJST();
-const activeEvents = allEvents.filter((e) => !isEventEnded(e, todayYmd));
+const activeEvents = allEvents.filter((e) => isEventOngoing(e, todayYmd));
 const monthsNav = uniqueStartMonthsDescending(activeEvents);
 const categorySlugsNav = uniqueCategorySlugsInNiconicoOrder(activeEvents);
 const events = slugSafe
@@ -42,16 +42,16 @@ const events = slugSafe
 const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
 const categoryLabel = slugSafe ? categoryLabelFromSlug(slugSafe) : "";
 const metaTitle = categoryLabel
-	? `${categoryLabel} | 投稿祭スケジュール（非公式）`
-	: "投稿祭スケジュール（非公式）";
+	? `${categoryLabel} · 開催中 | 投稿祭スケジュール（非公式）`
+	: "開催中イベント | 投稿祭スケジュール（非公式）";
 ---
 
 <BaseLayout
 	metaTitle={metaTitle}
-	pageHeading={categoryLabel ? `${categoryLabel}のイベント` : "投稿祭スケジュール"}
+	pageHeading={categoryLabel ? `${categoryLabel} · 開催中` : "開催中イベント"}
 	description={
 		categoryLabel
-			? `カテゴリ「${categoryLabel}」（ニコニコ動画ジャンル相当）の掲載中イベント一覧（非公式）。`
+			? `カテゴリ「${categoryLabel}」`
 			: undefined
 	}
 	navCurrent="home"
@@ -114,11 +114,10 @@ const metaTitle = categoryLabel
 					allEvents.length > 0 &&
 					activeEvents.length === 0 && (
 						<div class="banner banner-info">
-							<p class="banner-title">掲載中のイベントはありません</p>
+							<p class="banner-title">開催中のイベントはありません</p>
 							<p class="banner-body">
-								終了日（JST）を過ぎたイベントは
-								<a href="/ended/">開催終了イベント</a>
-								から参照できます。
+								<a href="/upcoming/">開催予定イベント</a>・<a href="/ended/">終了イベント</a>
+								もご覧ください。
 							</p>
 						</div>
 					)
@@ -131,9 +130,9 @@ const metaTitle = categoryLabel
 					events.length === 0 &&
 					slugSafe && (
 						<div class="banner banner-info">
-							<p class="banner-title">このカテゴリの掲載中イベントはありません</p>
+							<p class="banner-title">このカテゴリの開催中イベントはありません</p>
 							<p class="banner-body">
-								<a href="/">掲載中のイベント一覧（すべて）</a>をご覧ください。
+								<a href="/">開催中イベント（すべて）</a>をご覧ください。
 							</p>
 						</div>
 					)
@@ -142,7 +141,7 @@ const metaTitle = categoryLabel
 			{
 				events.length > 0 && (
 					<p class="count" aria-live="polite">
-						{events.length} 件（{categoryLabel} · 掲載日の新しい順）
+						{events.length} 件
 					</p>
 				)
 			}

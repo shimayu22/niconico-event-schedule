@@ -5,13 +5,19 @@ import type { CategorySlug } from "../lib/categories";
 interface Props {
 	slugs: CategorySlug[];
 	currentSlug: string | null;
-	basePath: "" | "/ended";
+	basePath: "" | "/ended" | "/upcoming";
 }
 
 const { slugs, currentSlug, basePath } = Astro.props;
-const allHref = basePath === "/ended" ? "/ended/" : "/";
-const prefix = basePath === "/ended" ? "/ended/category" : "/category";
-const selectId = `category-filter-${basePath === "/ended" ? "ended" : "home"}`;
+const allHref = basePath === "/ended" ? "/ended/" : basePath === "/upcoming" ? "/upcoming/" : "/";
+const prefix =
+	basePath === "/ended"
+		? "/ended/category"
+		: basePath === "/upcoming"
+			? "/upcoming/category"
+			: "/category";
+const selectKey = basePath === "/ended" ? "ended" : basePath === "/upcoming" ? "upcoming" : "home";
+const selectId = `category-filter-${selectKey}`;
 ---
 
 <div class="category-filter">
@@ -53,6 +59,7 @@ const selectId = `category-filter-${basePath === "/ended" ? "ended" : "home"}`;
 		display: flex;
 		flex-direction: column;
 		gap: 0.4rem;
+		width: 100%;
 		max-width: 28rem;
 	}
 
@@ -65,17 +72,31 @@ const selectId = `category-filter-${basePath === "/ended" ? "ended" : "home"}`;
 	}
 
 	.category-select {
-		appearance: auto;
+		appearance: none;
+		-webkit-appearance: none;
+		-moz-appearance: none;
 		width: 100%;
-		padding: 0.5rem 0.65rem;
-		font-size: 0.9rem;
-		font-weight: 500;
+		min-width: 0;
+		padding: 0.52rem 2.25rem 0.52rem 0.75rem;
+		font-size: 0.875rem;
+		font-weight: 550;
 		line-height: 1.4;
 		color: var(--text);
-		background: var(--card-bg);
-		border: 1px solid var(--border);
-		border-radius: 8px;
+		background-color: var(--card-bg);
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14' fill='none'%3E%3Cpath stroke='%235c6370' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.4' d='M3.5 5.25L7 8.75l3.5-3.5'/%3E%3C/svg%3E");
+		background-repeat: no-repeat;
+		background-position: right 0.65rem center;
+		background-size: 0.875rem;
+		border: 1px solid color-mix(in srgb, var(--border) 92%, var(--link));
+		border-radius: var(--radius-pill);
+		box-shadow: var(--shadow-sm);
 		cursor: pointer;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		.category-select {
+			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14' fill='none'%3E%3Cpath stroke='%239aa3b2' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.4' d='M3.5 5.25L7 8.75l3.5-3.5'/%3E%3C/svg%3E");
+		}
 	}
 
 	.category-select:hover {

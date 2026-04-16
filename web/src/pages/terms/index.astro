@@ -6,7 +6,6 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 	metaTitle="利用規約 | 投稿祭スケジュール（非公式）"
 	pageHeading="利用規約"
 	description="投稿祭スケジュール（非公式）の利用規約。現在は準備中です。"
-	navCurrent="terms"
 >
 	<main id="main" class="main">
 		<div class="inner">
@@ -20,8 +19,11 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 
 <style>
 	.terms-lead {
-		margin: 0 0 1rem;
-		font-size: 0.95rem;
+		margin: 0 0 1.25rem;
+		font-size: 0.9375rem;
+		line-height: 1.65;
+		color: var(--text);
+		max-width: 40rem;
 	}
 
 	.terms-back {
@@ -30,13 +32,28 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 	}
 
 	.terms-back a {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
 		color: var(--link);
-		font-weight: 500;
+		font-weight: 600;
 		text-decoration: none;
-		border-bottom: 1px solid transparent;
+		padding: 0.35rem 0.65rem;
+		border-radius: var(--radius-sm);
+		border: 1px solid color-mix(in srgb, var(--border) 85%, var(--link));
+		background: var(--card-bg);
+		transition:
+			background 0.15s ease,
+			border-color 0.15s ease;
 	}
 
 	.terms-back a:hover {
-		border-bottom-color: color-mix(in srgb, var(--link) 45%, transparent);
+		background: light-dark(rgb(0 0 0 / 0.03), rgb(255 255 255 / 0.06));
+		border-color: color-mix(in srgb, var(--link) 35%, var(--border));
+	}
+
+	.terms-back a:focus-visible {
+		outline: 2px solid var(--link);
+		outline-offset: 2px;
 	}
 </style>

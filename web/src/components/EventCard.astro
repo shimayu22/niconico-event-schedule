@@ -1,11 +1,16 @@
 ---
 import type { EventRow } from "../lib/events";
+import { formatPeriodYearCaption, formatYmdJaMonthDayWeekday } from "../lib/jst-date";
 
 interface Props {
 	event: EventRow;
 }
 
 const { event } = Astro.props;
+
+const startDateDisplay = formatYmdJaMonthDayWeekday(event.startDate) ?? event.startDate;
+const endDateDisplay = formatYmdJaMonthDayWeekday(event.endDate) ?? event.endDate;
+const periodYearCaption = formatPeriodYearCaption(event.startDate, event.endDate);
 
 const publishedDisplay = (() => {
 	const d = new Date(event.publishedAt);
@@ -16,9 +21,16 @@ const publishedDisplay = (() => {
 		timeZone: "Asia/Tokyo",
 	}).format(d);
 })();
+
+const cardLinkLabel = `「${event.eventName}」をニコニコで開く`;
+const submitterLinkLabel =
+	event.xUrl && event.xHandle
+		? `${event.submitterName}（X @${event.xHandle}）のプロフィールを開く`
+		: null;
 ---
 
 <article class="card">
+	<a class="card-hit" href={event.niconicoUrl} target="_blank" rel="noopener noreferrer" aria-label={cardLinkLabel}></a>
 	<div class="thumb-wrap">
 		{
 			event.thumbnailUrl ? (
@@ -26,8 +38,8 @@ const publishedDisplay = (() => {
 					class="thumb"
 					src={event.thumbnailUrl}
 					alt=""
-					width="360"
-					height="270"
+					width="640"
+					height="360"
 					loading="lazy"
 					decoding="async"
 				/>
@@ -39,54 +51,102 @@ const publishedDisplay = (() => {
 		}
 	</div>
 	<div class="card-body">
-	<h2 class="title">{event.eventName}</h2>
-	<p class="meta">
-		<span class="submitter">{event.submitterName}</span>
-		<span class="sep" aria-hidden="true">·</span>
-		<span class="category">{event.category}</span>
-	</p>
-	<p class="dates">
-		<time datetime={event.startDate}>{event.startDate}</time>
-		<span class="range" aria-hidden="true">〜</span>
-		<time datetime={event.endDate}>{event.endDate}</time>
-	</p>
-	<p class="published"><span class="label">掲載日時</span> {publishedDisplay}</p>
-	<div class="links">
-		<a class="link link-nico" href={event.niconicoUrl} target="_blank" rel="noopener noreferrer">
-			ニコニコで見る
-		</a>
-		{
-			event.xUrl && event.xHandle && (
-				<a class="link link-x" href={event.xUrl} target="_blank" rel="noopener noreferrer">
-					X @{event.xHandle}
-				</a>
-			)
-		}
-	</div>
+		<h2 class="title">{event.eventName}</h2>
+		<p class="category-row">
+			<span class="category-badge">{event.category}</span>
+			{periodYearCaption && <span class="category-badge">{periodYearCaption}</span>}
+		</p>
+		<div class="dates-block">
+			<span class="dates-heading">開催期間</span>
+			<p class="dates-range">
+				<time datetime={event.startDate}>{startDateDisplay}</time>
+				<span class="range" aria-hidden="true">〜</span>
+				<time datetime={event.endDate}>{endDateDisplay}</time>
+			</p>
+		</div>
+		<p class="submitter-row">
+			<span class="field-label">主催者：</span>
+			{
+				event.xUrl && submitterLinkLabel ? (
+					<a
+						class="submitter-link"
+						href={event.xUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						aria-label={submitterLinkLabel}
+					>
+						<span class="submitter-x-mark" aria-hidden="true">X</span>
+						<span class="submitter-name">{event.submitterName}</span>
+					</a>
+				) : (
+					<span class="submitter">{event.submitterName}</span>
+				)
+			}
+		</p>
+		<p class="published">
+			<span class="label">{"\u63b2\u8f09\u65e5\u6642"}</span>
+			{" "}
+			{publishedDisplay}
+		</p>
 	</div>
 </article>
 
 <style>
+	/* Niconico watch-style accent (pink/red family) */
 	.card {
+		--nico-accent: #ff6678;
+		--nico-accent-deep: #e5173f;
+		--nico-accent-dark: #b81232;
+		position: relative;
+		width: 100%;
 		border: 1px solid var(--border);
-		border-radius: 12px;
-		padding: 0;
+		border-radius: var(--radius-lg);
+		padding: 0.45rem 0.45rem 0;
 		overflow: hidden;
 		background: var(--card-bg);
-		box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+		box-shadow: var(--shadow-sm);
 		display: flex;
 		flex-direction: column;
 		min-height: 0;
+		transition:
+			box-shadow 0.22s ease,
+			border-color 0.22s ease,
+			transform 0.22s ease;
+	}
+
+	.card-hit {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		border-radius: var(--radius-lg);
+		text-decoration: none;
+		color: transparent;
+		outline: none;
+	}
+
+	.card-hit:focus-visible {
+		outline: 3px solid var(--nico-accent-deep);
+		outline-offset: -3px;
+	}
+
+	@media (hover: hover) {
+		.card:hover {
+			box-shadow:
+				0 14px 36px rgb(0 0 0 / 0.14),
+				0 4px 12px color-mix(in srgb, var(--nico-accent-deep) 18%, transparent);
+			border-color: color-mix(in srgb, var(--nico-accent-deep) 32%, var(--border));
+			transform: translateY(-6px);
+		}
 	}
 
 	.thumb-wrap {
-		/* .L サムネは 360×270（4:3）。カード全幅に引き伸ばさずネイティブ解像度付近で表示してぼやけを抑える */
-		aspect-ratio: 4 / 3;
-		width: 100%;
-		max-width: 360px;
-		margin-inline: auto;
-		background: light-dark(#e8eaef, #252a32);
 		position: relative;
+		z-index: 0;
+		aspect-ratio: 16 / 9;
+		width: 100%;
+		background: light-dark(#0d0d0f, #0a0a0c);
+		border-radius: var(--radius-md);
+		overflow: hidden;
 	}
 
 	.thumb {
@@ -94,6 +154,14 @@ const publishedDisplay = (() => {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+		transition: transform 0.22s ease, filter 0.22s ease;
+	}
+
+	@media (hover: hover) {
+		.card:hover .thumb {
+			transform: scale(1.03);
+			filter: brightness(1.04);
+		}
 	}
 
 	.thumb-placeholder {
@@ -102,84 +170,221 @@ const publishedDisplay = (() => {
 		justify-content: center;
 		width: 100%;
 		height: 100%;
-		min-height: 7rem;
+		min-height: 5rem;
 		color: var(--muted);
-		font-size: 0.8rem;
+		font-size: 0.75rem;
 	}
 
 	.thumb-placeholder-text {
-		padding: 0.5rem 0.75rem;
-		border-radius: 6px;
-		background: light-dark(rgb(0 0 0 / 0.05), rgb(255 255 255 / 0.06));
+		padding: 0.35rem 0.6rem;
+		border-radius: var(--radius-sm);
+		background: light-dark(rgb(255 255 255 / 0.08), rgb(255 255 255 / 0.06));
 	}
 
 	.card-body {
-		padding: 1.25rem 1.35rem;
+		position: relative;
+		z-index: 2;
+		padding: 0.65rem 0.55rem 0.75rem;
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: 0.4rem;
+		pointer-events: none;
+		--card-meta-size: 0.875rem;
+		--card-meta-line: 1.42;
 	}
 
 	.title {
-		font-size: 1.05rem;
-		font-weight: 650;
-		line-height: 1.45;
+		font-size: 1.0625rem;
+		font-weight: 700;
+		line-height: 1.36;
 		margin: 0;
 		color: var(--text);
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
 	}
 
-	.meta {
+	.submitter-row {
 		margin: 0;
-		font-size: 0.875rem;
-		color: var(--muted);
-	}
-
-	.sep {
-		margin: 0 0.35rem;
-	}
-
-	.dates {
-		margin: 0;
-		font-size: 0.9rem;
-		color: var(--text);
-	}
-
-	.range {
-		margin: 0 0.25rem;
+		font-size: var(--card-meta-size);
+		line-height: var(--card-meta-line);
+		color: color-mix(in srgb, var(--text) 52%, var(--muted));
 	}
 
 	.published {
 		margin: 0;
-		font-size: 0.8rem;
+		margin-top: 0.1rem;
+		font-size: 0.75rem;
+		line-height: 1.4;
+		color: color-mix(in srgb, var(--muted) 92%, var(--text) 8%);
+		font-weight: 400;
+	}
+
+	.category-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.4rem 0.55rem;
+		margin: 0;
+		line-height: 1.35;
+	}
+
+	.category-kicker {
+		font-size: 0.625rem;
+		font-weight: 700;
+		letter-spacing: 0.14em;
+		color: color-mix(in srgb, var(--muted) 85%, var(--text) 15%);
+		text-transform: uppercase;
+	}
+
+	.field-label {
+		font-weight: 650;
 		color: var(--muted);
 	}
 
-	.label {
+	.submitter {
 		font-weight: 500;
 	}
 
-	.links {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.65rem;
-		margin-top: 0.35rem;
-	}
-
-	.link {
-		font-size: 0.875rem;
-		font-weight: 500;
+	.submitter-link {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.32rem;
+		pointer-events: auto;
+		font-weight: 600;
 		color: var(--link);
 		text-decoration: none;
-		border-bottom: 1px solid transparent;
+		border-radius: 4px;
+		transition: color 0.15s ease;
 	}
 
-	.link:hover {
-		border-bottom-color: color-mix(in srgb, var(--link) 45%, transparent);
+	.submitter-link:hover {
+		color: var(--link-hover);
+		text-decoration: underline;
+		text-underline-offset: 0.12em;
 	}
 
-	.link:focus-visible {
+	.submitter-link:hover .submitter-x-mark {
+		border-color: color-mix(in srgb, var(--link-hover) 45%, var(--border));
+		color: var(--link-hover);
+	}
+
+	.submitter-link:focus-visible {
 		outline: 2px solid var(--link);
 		outline-offset: 2px;
-		border-radius: 2px;
+	}
+
+	.submitter-name {
+		font-weight: 600;
+	}
+
+	.submitter-x-mark {
+		flex-shrink: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.1rem;
+		height: 1.1rem;
+		font-size: 0.58rem;
+		font-weight: 800;
+		line-height: 1;
+		letter-spacing: -0.02em;
+		color: var(--text);
+		background: light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.1));
+		border: 1px solid color-mix(in srgb, var(--border) 88%, var(--text));
+		border-radius: 5px;
+		transition:
+			border-color 0.15s ease,
+			color 0.15s ease;
+	}
+
+	.category-badge {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.22rem 0.62rem 0.24rem;
+		font-size: 0.8125rem;
+		font-weight: 650;
+		letter-spacing: 0.03em;
+		color: color-mix(in srgb, var(--text) 92%, var(--muted));
+		background: linear-gradient(
+			155deg,
+			light-dark(rgb(0 0 0 / 0.035), rgb(255 255 255 / 0.09)) 0%,
+			light-dark(rgb(0 0 0 / 0.065), rgb(255 255 255 / 0.05)) 100%
+		);
+		border: 1px solid color-mix(in srgb, var(--accent-line) 28%, var(--border));
+		border-radius: var(--radius-pill);
+		box-shadow:
+			0 1px 2px rgb(0 0 0 / 0.05),
+			inset 0 1px 0 light-dark(rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.06));
+		line-height: 1.3;
+		vertical-align: baseline;
+	}
+
+	.dates-block {
+		margin: 0;
+		padding: 0.48rem 0.55rem 0.52rem;
+		border-radius: var(--radius-md);
+		background: light-dark(
+			color-mix(in srgb, var(--banner-info-bg) 42%, var(--card-bg)),
+			color-mix(in srgb, var(--banner-info-bg) 38%, var(--card-bg))
+		);
+		border: 1px solid color-mix(in srgb, var(--link) 18%, var(--border));
+		box-shadow: 0 1px 0 light-dark(rgb(255 255 255 / 0.65), rgb(0 0 0 / 0.12));
+	}
+
+	.dates-heading {
+		display: block;
+		margin: 0 0 0.28rem;
+		font-size: 0.625rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		color: color-mix(in srgb, var(--muted) 75%, var(--link) 25%);
+		line-height: 1.2;
+	}
+
+	.dates-range {
+		margin: 0;
+		font-size: 0.9375rem;
+		font-weight: 700;
+		line-height: 1.38;
+		color: var(--text);
+		letter-spacing: 0.01em;
+	}
+
+	.dates-range time {
+		font-variant-numeric: tabular-nums;
+	}
+
+	.range {
+		margin: 0 0.22rem;
+		font-weight: 700;
+		color: color-mix(in srgb, var(--text) 55%, var(--muted));
+	}
+
+	.published .label {
+		font-weight: 500;
+		color: inherit;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.card {
+			transition: none;
+		}
+
+		.card:hover {
+			transform: none;
+		}
+
+		.thumb {
+			transition: none;
+		}
+
+		.card:hover .thumb {
+			transform: none;
+			filter: none;
+		}
 	}
 </style>

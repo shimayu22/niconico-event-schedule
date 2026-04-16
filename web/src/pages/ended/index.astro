@@ -26,8 +26,8 @@ const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
 ---
 
 <BaseLayout
-	metaTitle="開催終了イベント | 投稿祭スケジュール（非公式）"
-	pageHeading="開催終了イベント"
+	metaTitle="終了イベント | 投稿祭スケジュール（非公式）"
+	pageHeading="終了イベント"
 	description="終了日（JST の暦日）を過ぎた投稿祭・イベントの一覧（非公式）。"
 	navCurrent="ended"
 >
@@ -72,9 +72,9 @@ const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
 			{
 				!loadError && csvConfigured && allEvents.length > 0 && events.length === 0 && (
 					<div class="banner banner-info">
-						<p class="banner-title">開催終了の掲載はまだありません</p>
+						<p class="banner-title">終了したイベントの掲載はまだありません</p>
 						<p class="banner-body">
-							<a href="/">掲載中のイベント一覧</a>をご覧ください。
+							<a href="/">開催中イベント</a>・<a href="/upcoming/">開催予定イベント</a>をご覧ください。
 						</p>
 					</div>
 				)
