@@ -5,6 +5,7 @@
 - **現在の方針（静的・フォーム／シート・Astro 予定）**: [doc/static-site-strategy.md](doc/static-site-strategy.md)
 - **運用手順**（スプレッドシート更新・Deploy Hook・日次ビルド）: [doc/運用手順書.md](doc/運用手順書.md)
 - **初回セットアップ**（Cloudflare / GitHub / シート / ムームードメイン）: [doc/本番初回セットアップ手順.md](doc/本番初回セットアップ手順.md)
+- **サイト構成図**（システム全体・ビルドフロー）: [doc/サイト構成図.md](doc/サイト構成図.md)
 - 機能仕様（旧・Supabase 案）: [doc/old/functional-spec.md](doc/old/functional-spec.md)
 - アーキテクチャ（旧・Next + Supabase）: [doc/old/system-architecture.md](doc/old/system-architecture.md)
 - DB・RLS（参考・現方針では未使用）: [doc/old/supabase/README.md](doc/old/supabase/README.md)
@@ -29,6 +30,6 @@
 
 | パス | 内容 |
 |------|------|
-| `doc/` | 仕様・日報・**現行方針**（`static-site-strategy.md`）・**運用**（[`運用手順書.md`](doc/運用手順書.md)）・**初回**（[`本番初回セットアップ手順.md`](doc/本番初回セットアップ手順.md)） |
+| `doc/` | 仕様・日報・**現行方針**（`static-site-strategy.md`）・**運用**（[`運用手順書.md`](doc/運用手順書.md)）・**初回**（[`本番初回セットアップ手順.md`](doc/本番初回セットアップ手順.md)）・**構成図**（[`サイト構成図.md`](doc/サイト構成図.md)） |
 | `web/` | 静的サイト本体（**Astro 予定**。スキャフォールド後に本表を更新） |
 | `doc/old/supabase/` | 旧構成用マイグレーション（参考。フォーム／シート構成では未使用） |
