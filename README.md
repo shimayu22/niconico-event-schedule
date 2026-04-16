@@ -16,7 +16,7 @@
 
 ### デプロイ（方針：Cloudflare Pages + GitHub 非公開）
 
-**本番ホスティング**は [doc/static-site-strategy.md](doc/static-site-strategy.md) **§2.8** のとおり **Cloudflare Pages** とし、**GitHub リポジトリは非公開（private）** を前提にします。ビルド時に **`PUBLIC_EVENTS_CSV_URL`**（公開 CSV の URL）を Pages 側の環境変数で渡してください。シート更新後の再デプロイや日次ビルドの運用は [doc/運用手順書.md](doc/運用手順書.md) を参照してください。
+**本番ホスティング**は [doc/static-site-strategy.md](doc/static-site-strategy.md) **§2.8** のとおり **Cloudflare Pages** とし、<strong>GitHub リポジトリは非公開（private）</strong> を前提にします。ビルド時に **`PUBLIC_EVENTS_CSV_URL`**（公開 CSV の URL）を Pages 側の環境変数で渡してください。シート更新後の再デプロイや日次ビルドの運用は [doc/運用手順書.md](doc/運用手順書.md) を参照してください。
 
 **移行未了**：`.github/workflows/deploy-web.yml` は **GitHub Pages 向け**のままです。Cloudflare の **Git 連携**に切り替えるか、Actions から Wrangler 等で Pages へデプロイするか決めたうえで、本 README とワークフローを更新します。プロジェクトサイト形式で GitHub Pages に載せる場合は `web/astro.config.mjs` の `base` が必要になることがあります（Cloudflare 側の URL 構成に合わせて調整）。
 
