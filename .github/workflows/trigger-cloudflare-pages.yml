@@ -1,0 +1,31 @@
+# Cloudflare Pages の Deploy Hook を叩き、本番ビルドだけ再実行する（git に新コミットがなくても可）。
+#
+# セットアップ:
+#   1. Cloudflare: Pages プロジェクト → Settings → Builds → Deploy hooks でフックを作成（branch: main）
+#   2. GitHub: リポジトリ → Settings → Secrets and variables → Actions
+#      → New repository secret → Name: CLOUDFLARE_PAGES_DEPLOY_HOOK_URL
+#      → Secret: フックの URL をコピーして貼り付け
+#
+# スケジュール: 毎日 15:01 UTC = 日本時間 翌日 0:01（日付変更直後）
+
+name: Trigger Cloudflare Pages rebuild
+
+on:
+  schedule:
+    - cron: "1 15 * * *"
+  workflow_dispatch:
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: POST deploy hook
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$DEPLOY_HOOK_URL" ]; then
+            echo "::error::Secrets に CLOUDFLARE_PAGES_DEPLOY_HOOK_URL が未設定です。"
+            exit 1
+          fi
+          curl -sfS -X POST "$DEPLOY_HOOK_URL"
+          echo "Deploy hook accepted."
