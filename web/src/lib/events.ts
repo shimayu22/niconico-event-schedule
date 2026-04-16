@@ -84,6 +84,22 @@ async function attachThumbnails(rows: EventRow[]): Promise<void> {
 	);
 }
 
+export type LoadEventsResult = { rows: EventRow[]; error: string | null };
+
+/** 一覧ページ用: 失敗時も例外を投げず `{ rows: [], error }` を返す。 */
+export async function loadEventsSafe(): Promise<LoadEventsResult> {
+	try {
+		const rows = await loadEvents();
+		return { rows, error: null };
+	} catch (e) {
+		return { rows: [], error: e instanceof Error ? e.message : String(e) };
+	}
+}
+
+export function isCsvUrlConfigured(): boolean {
+	return Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
+}
+
 export async function loadEvents(): Promise<EventRow[]> {
 	const url = import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim();
 	if (!url) return [];

@@ -1,10 +1,14 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
-import EventCard from "../../../components/EventCard.astro";
 import MonthFilter from "../../../components/MonthFilter.astro";
 import CategoryFilter from "../../../components/CategoryFilter.astro";
-import { loadEvents } from "../../../lib/events";
+import BannerLoadError from "../../../components/BannerLoadError.astro";
+import BannerCsvMissing from "../../../components/BannerCsvMissing.astro";
+import BannerNoCsvRows from "../../../components/BannerNoCsvRows.astro";
+import EventGrid from "../../../components/EventGrid.astro";
+import { loadEventsSafe, isCsvUrlConfigured } from "../../../lib/events";
 import { calendarDateJST, isEventEnded, sortEndedEventsForDisplay } from "../../../lib/jst-date";
+import { staticPathsForStartMonths } from "../../../lib/static-paths";
 import {
 	eventStartsInMonth,
 	formatStartMonthLabelJa,
@@ -14,36 +18,19 @@ import {
 import { uniqueCategorySlugsInNiconicoOrder } from "../../../lib/categories";
 
 export async function getStaticPaths() {
-	try {
-		const all = await loadEvents();
-		const todayYmd = calendarDateJST();
-		const ended = all.filter((e) => isEventEnded(e, todayYmd));
-		const months = uniqueStartMonthsDescending(ended);
-		return months.map((ym) => ({ params: { ym } }));
-	} catch {
-		return [];
-	}
+	return staticPathsForStartMonths((e, ymd) => isEventEnded(e, ymd));
 }
 
 const { ym } = Astro.params;
 const ymSafe = typeof ym === "string" && isValidYm(ym) ? ym : "";
 
-let allEvents: Awaited<ReturnType<typeof loadEvents>> = [];
-let loadError: string | null = null;
-
-try {
-	allEvents = await loadEvents();
-} catch (e) {
-	loadError = e instanceof Error ? e.message : String(e);
-}
-
+const { rows: allEvents, error: loadError } = await loadEventsSafe();
 const todayYmd = calendarDateJST();
 const endedAll = sortEndedEventsForDisplay(allEvents.filter((e) => isEventEnded(e, todayYmd)));
 const monthsNav = uniqueStartMonthsDescending(endedAll);
 const categorySlugsNav = uniqueCategorySlugsInNiconicoOrder(endedAll);
 const events = ymSafe ? endedAll.filter((e) => eventStartsInMonth(e, ymSafe)) : [];
-
-const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
+const csvConfigured = isCsvUrlConfigured();
 const monthLabel = ymSafe ? formatStartMonthLabelJa(ymSafe) : "";
 const metaTitle = ymSafe
 	? `${monthLabel}開始 · 終了イベント | 投稿祭スケジュール（非公式）`
@@ -62,33 +49,13 @@ const metaTitle = ymSafe
 >
 	<main id="main" class="main">
 		<div class="inner">
-			{
-				loadError && (
-					<div class="banner banner-error" role="alert">
-						<p class="banner-title">データを読み込めませんでした</p>
-						<p class="banner-body">{loadError}</p>
-					</div>
-				)
-			}
+			{loadError && <BannerLoadError message={loadError} />}
 
-			{
-				!loadError && !csvConfigured && (
-					<div class="banner banner-info">
-						<p class="banner-title">CSV の URL が未設定です</p>
-						<p class="banner-body">
-							ビルド環境の <code>PUBLIC_EVENTS_CSV_URL</code> を設定してください。
-						</p>
-					</div>
-				)
-			}
+			{!loadError && !csvConfigured && <BannerCsvMissing variant="ci" />}
 
 			{
 				!loadError && csvConfigured && categorySlugsNav.length > 0 && (
-					<CategoryFilter
-						slugs={categorySlugsNav}
-						currentSlug={null}
-						basePath="/ended"
-					/>
+					<CategoryFilter slugs={categorySlugsNav} currentSlug={null} basePath="/ended" />
 				)
 			}
 
@@ -111,10 +78,7 @@ const metaTitle = ymSafe
 
 			{
 				!loadError && csvConfigured && allEvents.length === 0 && (
-					<div class="banner banner-info">
-						<p class="banner-title">表示する行がありません</p>
-						<p class="banner-body">CSV の内容を確認してください。</p>
-					</div>
+					<BannerNoCsvRows variant="short" />
 				)
 			}
 
@@ -141,13 +105,7 @@ const metaTitle = ymSafe
 				)
 			}
 
-			<ul class="grid" role="list">
-				{events.map((event) => (
-					<li class="grid-item" role="listitem">
-						<EventCard event={event} />
-					</li>
-				))}
-			</ul>
+			<EventGrid events={events} />
 		</div>
 	</main>
 </BaseLayout>

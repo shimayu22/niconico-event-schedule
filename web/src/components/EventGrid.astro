@@ -1,0 +1,20 @@
+---
+import type { EventRow } from "../lib/events";
+import EventCard from "./EventCard.astro";
+
+interface Props {
+	events: EventRow[];
+}
+
+const { events } = Astro.props;
+---
+
+<ul class="grid" role="list">
+	{
+		events.map((event) => (
+			<li class="grid-item" role="listitem">
+				<EventCard event={event} />
+			</li>
+		))
+	}
+</ul>

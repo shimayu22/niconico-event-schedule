@@ -1,28 +1,22 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import EventCard from "../../components/EventCard.astro";
 import MonthFilter from "../../components/MonthFilter.astro";
 import CategoryFilter from "../../components/CategoryFilter.astro";
-import { loadEvents } from "../../lib/events";
+import BannerLoadError from "../../components/BannerLoadError.astro";
+import BannerCsvMissing from "../../components/BannerCsvMissing.astro";
+import BannerNoCsvRows from "../../components/BannerNoCsvRows.astro";
+import EventGrid from "../../components/EventGrid.astro";
+import { loadEventsSafe, isCsvUrlConfigured } from "../../lib/events";
 import { calendarDateJST, isEventEnded, sortEndedEventsForDisplay } from "../../lib/jst-date";
 import { uniqueStartMonthsDescending } from "../../lib/start-month";
 import { uniqueCategorySlugsInNiconicoOrder } from "../../lib/categories";
 
-let allEvents: Awaited<ReturnType<typeof loadEvents>> = [];
-let loadError: string | null = null;
-
-try {
-	allEvents = await loadEvents();
-} catch (e) {
-	loadError = e instanceof Error ? e.message : String(e);
-}
-
+const { rows: allEvents, error: loadError } = await loadEventsSafe();
 const todayYmd = calendarDateJST();
 const events = sortEndedEventsForDisplay(allEvents.filter((e) => isEventEnded(e, todayYmd)));
 const monthsNav = uniqueStartMonthsDescending(events);
 const categorySlugsNav = uniqueCategorySlugsInNiconicoOrder(events);
-
-const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
+const csvConfigured = isCsvUrlConfigured();
 ---
 
 <BaseLayout
@@ -33,33 +27,13 @@ const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
 >
 	<main id="main" class="main">
 		<div class="inner">
-			{
-				loadError && (
-					<div class="banner banner-error" role="alert">
-						<p class="banner-title">データを読み込めませんでした</p>
-						<p class="banner-body">{loadError}</p>
-					</div>
-				)
-			}
+			{loadError && <BannerLoadError message={loadError} />}
 
-			{
-				!loadError && !csvConfigured && (
-					<div class="banner banner-info">
-						<p class="banner-title">CSV の URL が未設定です</p>
-						<p class="banner-body">
-							ビルド環境の <code>PUBLIC_EVENTS_CSV_URL</code> を設定してください。
-						</p>
-					</div>
-				)
-			}
+			{!loadError && !csvConfigured && <BannerCsvMissing variant="ci" />}
 
 			{
 				!loadError && csvConfigured && categorySlugsNav.length > 0 && (
-					<CategoryFilter
-						slugs={categorySlugsNav}
-						currentSlug={null}
-						basePath="/ended"
-					/>
+					<CategoryFilter slugs={categorySlugsNav} currentSlug={null} basePath="/ended" />
 				)
 			}
 
@@ -82,10 +56,7 @@ const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
 
 			{
 				!loadError && csvConfigured && allEvents.length === 0 && (
-					<div class="banner banner-info">
-						<p class="banner-title">表示する行がありません</p>
-						<p class="banner-body">CSV の内容を確認してください。</p>
-					</div>
+					<BannerNoCsvRows variant="short" />
 				)
 			}
 
@@ -97,13 +68,7 @@ const csvConfigured = Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
 				)
 			}
 
-			<ul class="grid" role="list">
-				{events.map((event) => (
-					<li class="grid-item" role="listitem">
-						<EventCard event={event} />
-					</li>
-				))}
-			</ul>
+			<EventGrid events={events} />
 		</div>
 	</main>
 </BaseLayout>

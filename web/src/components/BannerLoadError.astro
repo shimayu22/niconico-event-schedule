@@ -1,0 +1,12 @@
+---
+interface Props {
+	message: string;
+}
+
+const { message } = Astro.props;
+---
+
+<div class="banner banner-error" role="alert">
+	<p class="banner-title">データを読み込めませんでした</p>
+	<p class="banner-body">{message}</p>
+</div>

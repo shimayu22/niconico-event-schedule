@@ -1,0 +1,28 @@
+---
+/** local: 開発時の .env 案内 / ci: 本番ビルド向け短い案内 */
+type Variant = "local" | "ci";
+
+interface Props {
+	variant: Variant;
+}
+
+const { variant } = Astro.props;
+---
+
+<div class="banner banner-info">
+	<p class="banner-title">CSV の URL が未設定です</p>
+	<p class="banner-body">
+		{
+			variant === "local" ? (
+				<>
+					<code>web/.env</code> に{" "}
+					<code>PUBLIC_EVENTS_CSV_URL=（公開 CSV の URL）</code> を設定して開発サーバーを再起動してください。
+				</>
+			) : (
+				<>
+					ビルド環境の <code>PUBLIC_EVENTS_CSV_URL</code> を設定してください。
+				</>
+			)
+		}
+	</p>
+</div>

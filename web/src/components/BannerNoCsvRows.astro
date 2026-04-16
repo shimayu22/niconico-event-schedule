@@ -1,0 +1,25 @@
+---
+/** spec: 列ヘッダー案内あり / short: 終了系ページ向け短文 */
+type Variant = "spec" | "short";
+
+interface Props {
+	variant: Variant;
+}
+
+const { variant } = Astro.props;
+---
+
+<div class="banner banner-info">
+	<p class="banner-title">表示する行がありません</p>
+	<p class="banner-body">
+		{
+			variant === "spec" ? (
+				<>
+					CSV に有効な行があるか、列ヘッダーが <code>id</code>, <code>published_at</code> など仕様どおりか確認してください。
+				</>
+			) : (
+				<>CSV の内容を確認してください。</>
+			)
+		}
+	</p>
+</div>
