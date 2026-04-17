@@ -110,7 +110,13 @@ export function isCsvUrlConfigured(): boolean {
 	return Boolean(import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim());
 }
 
-export async function loadEvents(): Promise<EventRow[]> {
+/**
+ * 本番ビルド（`astro build`）では静的ページ数分だけこの関数が呼ばれるため、
+ * CSV 取得〜サムネ付与まで 1 プロセス1 回にまとめる。`astro dev`ではキャッシュしない（CSV 更新をそのまま反映）。
+ */
+let loadEventsProdCache: Promise<EventRow[]> | null = null;
+
+async function loadEventsOnce(): Promise<EventRow[]> {
 	const url = import.meta.env.PUBLIC_EVENTS_CSV_URL?.trim();
 	if (!url) return [];
 
@@ -154,4 +160,14 @@ export async function loadEvents(): Promise<EventRow[]> {
 	await attachThumbnails(rows);
 
 	return rows;
+}
+
+export async function loadEvents(): Promise<EventRow[]> {
+	if (import.meta.env.PROD) {
+		if (!loadEventsProdCache) {
+			loadEventsProdCache = loadEventsOnce();
+		}
+		return loadEventsProdCache;
+	}
+	return loadEventsOnce();
 }
