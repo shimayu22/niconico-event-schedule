@@ -65,21 +65,31 @@ function mapRawRow(raw: Record<string, string>): EventRow | null {
 	};
 }
 
+/** 静的ビルド中に各ページが `loadEvents()` するたびに getthumbinfo を取り直さない（同一プロセス内で共有）。 */
+const thumbnailByContentId = new Map<string, string | null>();
+const thumbnailInflight = new Map<string, Promise<string | null>>();
+
+function getThumbnailUrlCached(contentId: string): Promise<string | null> {
+	if (thumbnailByContentId.has(contentId)) {
+		return Promise.resolve(thumbnailByContentId.get(contentId)!);
+	}
+	let pending = thumbnailInflight.get(contentId);
+	if (!pending) {
+		pending = fetchNiconicoThumbnailUrl(contentId).then((url) => {
+			thumbnailByContentId.set(contentId, url);
+			thumbnailInflight.delete(contentId);
+			return url;
+		});
+		thumbnailInflight.set(contentId, pending);
+	}
+	return pending;
+}
+
 async function attachThumbnails(rows: EventRow[]): Promise<void> {
-	const cache = new Map<string, string | null>();
-
-	const getForContentId = async (contentId: string): Promise<string | null> => {
-		const hit = cache.get(contentId);
-		if (hit !== undefined) return hit;
-		const thumb = await fetchNiconicoThumbnailUrl(contentId);
-		cache.set(contentId, thumb);
-		return thumb;
-	};
-
 	await Promise.all(
 		rows.map(async (row) => {
 			const cid = niconicoContentIdFromWatchUrl(row.niconicoUrl);
-			row.thumbnailUrl = cid ? await getForContentId(cid) : null;
+			row.thumbnailUrl = cid ? await getThumbnailUrlCached(cid) : null;
 		}),
 	);
 }
