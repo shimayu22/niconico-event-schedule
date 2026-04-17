@@ -1,25 +1,8 @@
----
-/** spec: 列ヘッダー案内あり / short: 終了系ページ向け短文 */
-type Variant = "spec" | "short";
-
-interface Props {
-	variant: Variant;
-}
-
-const { variant } = Astro.props;
----
-
 <div class="banner banner-info">
 	<p class="banner-title">表示する行がありません</p>
 	<p class="banner-body">
-		{
-			variant === "spec" ? (
-				<>
-					CSV に有効な行があるか、列ヘッダーが <code>id</code>, <code>published_at</code> など仕様どおりか確認してください。
-				</>
-			) : (
-				<>CSV の内容を確認してください。</>
-			)
-		}
+		CSV に有効な行がないか、1 行目の列名が仕様と一致していない可能性があります。列ヘッダーは <code>id</code>, <code>published_at</code>,
+		<code>submitter_name</code>, <code>event_name</code>, <code>x_handle</code>, <code>niconico_url</code>, <code>start_date</code>,
+		<code>end_date</code>, <code>category</code> のように<strong>説明文を付けず</strong>、ドキュメントの定義どおりにしてください。公開 CSV をブラウザで開いて確認できます。
 	</p>
 </div>
