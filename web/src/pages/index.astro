@@ -7,13 +7,15 @@ import BannerCsvMissing from "../components/BannerCsvMissing.astro";
 import BannerNoCsvRows from "../components/BannerNoCsvRows.astro";
 import EventGrid from "../components/EventGrid.astro";
 import { loadEventsSafe, isCsvUrlConfigured } from "../lib/events";
-import { calendarDateJST, isEventOngoing } from "../lib/jst-date";
+import { calendarDateJST, isEventOngoing, sortOngoingEventsForDisplay } from "../lib/jst-date";
 import { uniqueStartMonthsDescending } from "../lib/start-month";
 import { uniqueCategorySlugsInNiconicoOrder } from "../lib/categories";
 
 const { rows: allEvents, error: loadError } = await loadEventsSafe();
 const todayYmd = calendarDateJST();
-const events = allEvents.filter((e) => isEventOngoing(e, todayYmd));
+const events = sortOngoingEventsForDisplay(
+	allEvents.filter((e) => isEventOngoing(e, todayYmd)),
+);
 const monthsNav = uniqueStartMonthsDescending(events);
 const categorySlugsNav = uniqueCategorySlugsInNiconicoOrder(events);
 const csvConfigured = isCsvUrlConfigured();

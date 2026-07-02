@@ -79,8 +79,8 @@ export function sortEndedEventsForDisplay(rows: EventRow[]): EventRow[] {
 	});
 }
 
-/** Upcoming list: earliest `start_date` first, then newest `published_at`. */
-export function sortUpcomingEventsForDisplay(rows: EventRow[]): EventRow[] {
+/** Earliest `start_date` first, then newest `published_at`. */
+function sortByStartDateAscForDisplay(rows: EventRow[]): EventRow[] {
 	return [...rows].sort((a, b) => {
 		if (a.startDate !== b.startDate) {
 			return a.startDate < b.startDate ? -1 : 1;
@@ -94,4 +94,14 @@ export function sortUpcomingEventsForDisplay(rows: EventRow[]): EventRow[] {
 		if (nb) return -1;
 		return tb - ta;
 	});
+}
+
+/** Ongoing list: earliest `start_date` first, then newest `published_at`. */
+export function sortOngoingEventsForDisplay(rows: EventRow[]): EventRow[] {
+	return sortByStartDateAscForDisplay(rows);
+}
+
+/** Upcoming list: earliest `start_date` first, then newest `published_at`. */
+export function sortUpcomingEventsForDisplay(rows: EventRow[]): EventRow[] {
+	return sortByStartDateAscForDisplay(rows);
 }
