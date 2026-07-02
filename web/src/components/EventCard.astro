@@ -1,16 +1,24 @@
 ---
 import type { EventRow } from "../lib/events";
-import { formatPeriodYearCaption, formatYmdJaMonthDayWeekday } from "../lib/jst-date";
+import {
+	daysUntilStartFromToday,
+	formatDaysUntilStartJa,
+	formatPeriodYearCaption,
+	formatYmdJaMonthDayWeekday,
+} from "../lib/jst-date";
 
 interface Props {
 	event: EventRow;
+	todayYmd?: string;
 }
 
-const { event } = Astro.props;
+const { event, todayYmd } = Astro.props;
 
 const startDateDisplay = formatYmdJaMonthDayWeekday(event.startDate) ?? event.startDate;
 const endDateDisplay = formatYmdJaMonthDayWeekday(event.endDate) ?? event.endDate;
 const periodYearCaption = formatPeriodYearCaption(event.startDate, event.endDate);
+const daysUntilStart =
+	todayYmd != null ? daysUntilStartFromToday(todayYmd, event.startDate) : null;
 
 const publishedDisplay = (() => {
 	const d = new Date(event.publishedAt);
@@ -57,7 +65,16 @@ const submitterLinkLabel =
 			{periodYearCaption && <span class="category-badge">{periodYearCaption}</span>}
 		</p>
 		<div class="dates-block">
-			<span class="dates-heading">開催期間</span>
+			<div class="dates-head">
+				<span class="dates-heading">開催期間</span>
+				{
+					daysUntilStart != null && (
+						<span class="days-until" aria-label={`開催まで${formatDaysUntilStartJa(daysUntilStart)}`}>
+							{formatDaysUntilStartJa(daysUntilStart)}
+						</span>
+					)
+				}
+			</div>
 			<p class="dates-range">
 				<time datetime={event.startDate}>{startDateDisplay}</time>
 				<span class="range" aria-hidden="true">〜</span>
@@ -327,14 +344,38 @@ const submitterLinkLabel =
 		box-shadow: 0 1px 0 light-dark(rgb(255 255 255 / 0.65), rgb(0 0 0 / 0.12));
 	}
 
+	.dates-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.45rem;
+		margin: 0 0 0.28rem;
+	}
+
 	.dates-heading {
 		display: block;
-		margin: 0 0 0.28rem;
+		margin: 0;
 		font-size: 0.625rem;
 		font-weight: 700;
 		letter-spacing: 0.12em;
 		color: color-mix(in srgb, var(--muted) 75%, var(--link) 25%);
 		line-height: 1.2;
+	}
+
+	.days-until {
+		flex-shrink: 0;
+		display: inline-flex;
+		align-items: center;
+		padding: 0.18rem 0.52rem 0.2rem;
+		font-size: 0.75rem;
+		font-weight: 800;
+		font-variant-numeric: tabular-nums;
+		letter-spacing: 0.02em;
+		color: var(--nico-accent-deep);
+		background: color-mix(in srgb, var(--nico-accent) 14%, var(--card-bg));
+		border: 1px solid color-mix(in srgb, var(--nico-accent-deep) 28%, var(--border));
+		border-radius: var(--radius-pill);
+		line-height: 1.25;
 	}
 
 	.dates-range {

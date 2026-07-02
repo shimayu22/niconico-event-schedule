@@ -69,6 +69,29 @@ export function isEventUpcoming(event: EventRow, todayYmd: string): boolean {
 	return !isEventEnded(event, todayYmd) && todayYmd < event.startDate;
 }
 
+/** Calendar days from `fromYmd` until `toYmd` (JST calendar days; both `YYYY-MM-DD`). */
+export function calendarDaysBetween(fromYmd: string, toYmd: string): number | null {
+	const from = dateFromYmdJst(fromYmd);
+	const to = dateFromYmdJst(toYmd);
+	if (!from || !to || Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+		return null;
+	}
+	const msPerDay = 86_400_000;
+	return Math.round((to.getTime() - from.getTime()) / msPerDay);
+}
+
+/** Days until `startYmd` from `todayYmd`; null when start is today or earlier, or dates are invalid. */
+export function daysUntilStartFromToday(todayYmd: string, startYmd: string): number | null {
+	const days = calendarDaysBetween(todayYmd, startYmd);
+	if (days == null || days <= 0) return null;
+	return days;
+}
+
+/** e.g. `あと3日` */
+export function formatDaysUntilStartJa(days: number): string {
+	return `あと${days}日`;
+}
+
 /** Ended list: newest `end_date` first, then newest `published_at`. */
 export function sortEndedEventsForDisplay(rows: EventRow[]): EventRow[] {
 	return [...rows].sort((a, b) => {

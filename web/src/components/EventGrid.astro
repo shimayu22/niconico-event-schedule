@@ -4,16 +4,17 @@ import EventCard from "./EventCard.astro";
 
 interface Props {
 	events: EventRow[];
+	todayYmd?: string;
 }
 
-const { events } = Astro.props;
+const { events, todayYmd } = Astro.props;
 ---
 
 <ul class="grid" role="list">
 	{
 		events.map((event) => (
 			<li class="grid-item" role="listitem">
-				<EventCard event={event} />
+				<EventCard event={event} todayYmd={todayYmd} />
 			</li>
 		))
 	}
