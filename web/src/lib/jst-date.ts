@@ -78,3 +78,20 @@ export function sortEndedEventsForDisplay(rows: EventRow[]): EventRow[] {
 		return Date.parse(b.publishedAt) - Date.parse(a.publishedAt);
 	});
 }
+
+/** Upcoming list: earliest `start_date` first, then newest `published_at`. */
+export function sortUpcomingEventsForDisplay(rows: EventRow[]): EventRow[] {
+	return [...rows].sort((a, b) => {
+		if (a.startDate !== b.startDate) {
+			return a.startDate < b.startDate ? -1 : 1;
+		}
+		const ta = Date.parse(a.publishedAt);
+		const tb = Date.parse(b.publishedAt);
+		const na = Number.isNaN(ta);
+		const nb = Number.isNaN(tb);
+		if (na && nb) return a.id.localeCompare(b.id);
+		if (na) return 1;
+		if (nb) return -1;
+		return tb - ta;
+	});
+}

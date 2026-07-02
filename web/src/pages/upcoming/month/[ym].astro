@@ -7,7 +7,11 @@ import BannerCsvMissing from "../../../components/BannerCsvMissing.astro";
 import BannerNoCsvRows from "../../../components/BannerNoCsvRows.astro";
 import EventGrid from "../../../components/EventGrid.astro";
 import { loadEventsSafe, isCsvUrlConfigured } from "../../../lib/events";
-import { calendarDateJST, isEventUpcoming } from "../../../lib/jst-date";
+import {
+	calendarDateJST,
+	isEventUpcoming,
+	sortUpcomingEventsForDisplay,
+} from "../../../lib/jst-date";
 import { staticPathsForStartMonths } from "../../../lib/static-paths";
 import {
 	eventStartsInMonth,
@@ -29,7 +33,9 @@ const todayYmd = calendarDateJST();
 const upcomingEvents = allEvents.filter((e) => isEventUpcoming(e, todayYmd));
 const monthsNav = uniqueStartMonthsDescending(upcomingEvents);
 const categorySlugsNav = uniqueCategorySlugsInNiconicoOrder(upcomingEvents);
-const events = ymSafe ? upcomingEvents.filter((e) => eventStartsInMonth(e, ymSafe)) : [];
+const events = ymSafe
+	? sortUpcomingEventsForDisplay(upcomingEvents.filter((e) => eventStartsInMonth(e, ymSafe)))
+	: [];
 const csvConfigured = isCsvUrlConfigured();
 const monthLabel = ymSafe ? formatStartMonthLabelJa(ymSafe) : "";
 const metaTitle = ymSafe
