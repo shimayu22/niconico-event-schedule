@@ -11,7 +11,7 @@
 | [functional-spec.md](./old/functional-spec.md) | **旧・機能仕様**（Supabase / 自前フォーム / 画像アップロード / Discord 等。**新方針と食い違う箇所あり**） |
 | [system-architecture.md](./old/system-architecture.md) | **旧・アーキテクチャ**（Next + Supabase 前提の記録） |
 | **本ファイル** | **現在のプロダクト／運用方針の整理**（静的化・シート中心） |
-| [本番初回セットアップ手順.md](./本番初回セットアップ手順.md) | **本番の初回設定**（Cloudflare / GitHub / スプレッドシート / ムームードメイン） |
+| [本番初回セットアップ手順.md](./本番初回セットアップ手順.md) | **各自の初回設定**（Cloudflare / GitHub / スプレッドシート / DNS） |
 | [サイト構成図.md](./サイト構成図.md) | **サイト構成図**（外部サービスと `web/` の関係） |
 
 ---
@@ -134,28 +134,32 @@
 - **再ビルド・再デプロイ**は、<strong>`main` への push</strong>、<strong>定時</strong>、<strong>手動</strong>などでトリガできる必要がある（シート更新だけでは日付は切り替わらない）。実装として **GitHub Actions**、<strong>Cloudflare Pages の Git 連携</strong>、またはその組み合わせを使う。**本番の配信先・リポジトリの公開可否は §2.8**。
 - ビルド時に **`PUBLIC_EVENTS_CSV_URL`** を環境変数で渡す（ローカルは `web/.env`、CI / Pages のビルド設定は各ホスティング側。手順は [README.md](../README.md)）。
 
-### 2.8 ホスティング（決定：Cloudflare Pages + 非公開 GitHub）
+### 2.8 ホスティング（決定：Cloudflare Pages + GitHub public・各自運用）
 
-**決定（2026-04）**：
+**決定（2026-07 更新）**：
 
-- **静的ホスティング**：**Cloudflare Pages** を使う。
-- **GitHub リポジトリ**：**非公開（private）** とする。
+- **静的ホスティング**：**Cloudflare Pages** を使う（**各自のアカウント**でプロジェクトを作成）。
+- **GitHub リポジトリ**：**公開（public）** とし、Fork して各自がホスティング・データ管理する。
+- **中央集権的な一本の本番サイト**は想定しない（より良い公開サービスに任せる方針）。
 
-**検討の経緯（要約）**：
+**2026-04 時点の経緯（参考）**：
+
+当初は **非公開 GitHub + 単一の本番 Pages** を想定していた（`doc/` 同居・独自ドメイン等の整理）。2026-07 に **public 化・各自ホスティング**へ方針を変更。
 
 | 論点 | 内容 |
 |------|------|
-| 無料・静的・独自ドメイン | **無料**で静的配信・**独自ドメイン**（例：`shimay.uno` の**サブドメイン**）を載せやすい。URL はサブドメインの方が、サブディレクトリ配下に載せるより構成が単純になりやすい（別途検討）。 |
-| GitHub Pages との比較 | **GitHub Free** では GitHub Pages が**公開リポジトリ向け**の位置づけのため、このリポジトリのように **`doc/` に内部メモ・方針・日次メモを同居**させると、<strong>リポジトリを公開したくない</strong>要件と衝突する。**非公開リポジトリのまま**無料で Pages を使う手段は、プラン次第で別途有料が必要になり得る。 |
-| Cloudflare Pages | Git 連携で **private リポジトリ**からビルドできる（**無料枠の範囲**で利用。詳細は [Cloudflare の Git 連携](https://developers.cloudflare.com/pages/get-started/git-integration/) など。 |
-| 「公開」の意味 | **ビルド成果物（サイト）は URL にアクセスすれば閲覧できる**（静的配信の性質上、HTML/JS は取得可能）。**`doc/` などを Git で非公開に保ちたい**という目的には、<strong>非公開 GitHub + Cloudflare Pages</strong> が合う。 |
-| ライセンス | リポジトリを**公開しない**場合でも LICENSE を置くかは任意。公開に切り替える際は `LICENSE` の検討を推奨。 |
+| 無料・静的・独自ドメイン | **無料**で静的配信・**独自ドメイン**（例：`schedule.example.com`）を載せやすい。 |
+| Cloudflare Pages | Git 連携で **public / private どちらのリポジトリ**からもビルドできる（**無料枠の範囲**で利用。詳細は [Cloudflare の Git 連携](https://developers.cloudflare.com/pages/get-started/git-integration/) など）。 |
+| Fork と独立性 | Fork 後は **自分の CSV URL・Deploy Hook・Pages プロジェクト**を設定する。upstream の運用には依存しない。 |
+| データ | **各自の掲載用スプレッドシート**を公開 CSV 化し、`PUBLIC_EVENTS_CSV_URL` に渡す。 |
+| ライセンス | public 化に合わせ **MIT License**（[LICENSE](../LICENSE)）。 |
 
-**実装・手順（未了）**：
+**実装・手順**：
 
-- 現状の **`.github/workflows/deploy-web.yml`** は **GitHub Pages 向け**の想定で書かれている。**Cloudflare Pages へ移行する際**は、<strong>Pages の Git 連携</strong>（push でビルド）に寄せるか、<strong>Actions から Wrangler 等で Pages にデプロイ</strong>するかを決め、ワークフロー・[README.md](../README.md) を更新する。
-- **`PUBLIC_EVENTS_CSV_URL`** は Cloudflare Pages の **環境変数（ビルド時）** に設定する。
-- **独自ドメイン**は Cloudflare（DNS 管理と Pages のカスタムドメイン）側で設定する。
+- Cloudflare Pages の **Git 連携**（push でビルド）と、任意で **Deploy Hook + GitHub Actions**（`.github/workflows/trigger-cloudflare-pages.yml`）。
+- **`PUBLIC_EVENTS_CSV_URL`** は Cloudflare Pages の **環境変数（ビルド時）** に設定する（ローカルは `web/.env`）。
+- **独自ドメイン**は Cloudflare（DNS 管理と Pages のカスタムドメイン）側で設定する（任意）。
+- 手順の詳細は [本番初回セットアップ手順.md](./本番初回セットアップ手順.md)・[README.md](../README.md)。
 
 ---
 
@@ -169,7 +173,7 @@
 | **カテゴリの値一覧** | **決定**（§ 2.3）：ニコニコ動画ジャンル相当 **17 値**を `categories.ts` に固定。シート・フォームの選択肢はこれに合わせる。 |
 | **開始月フィルタ** | **§ 2.3参照**。`start_date` の **JST 暦月（`YYYY-MM`）** で **`/month/…`** / **`/ended/month/…`** に分ける（ビルド時生成）。 |
 | **終了イベントの扱い** | **決定**（§ 2.7）。トップには出さず **`/ended/` のみ**。「今日」は **ビルド時の JST** — **定期／手動デプロイ** で反映。 |
-| **ホスティング** | **決定**（§2.8）：**Cloudflare Pages** + **GitHub 非公開リポジトリ**。移行手順・`deploy-web.yml` の更新は未了（[README.md](../README.md)）。 |
+| **ホスティング** | **決定**（§2.8）：**Cloudflare Pages** + **GitHub public（各自 Fork・各自データ）**。 |
 | **利用規約・問い合わせ文言** | **`/terms/` はプレースホルダ**。掲載条件・削除依頼・公開範囲など **本文を整備** する。 |
 | **旧資産（`doc/old/supabase/migrations` 等）** | 採用しない方針なら **アーカイブ**/README に「未使用」と注記するか。 |
 
@@ -178,15 +182,15 @@
 ## 4. リポジトリの現状と今後（合意事項）
 
 - **今**：Next.js コードは **撤去済み**。**`web/` に Astro 製の静的サイトあり**（§2.3）。`doc/old/supabase/migrations` はリポジトリに残っているが、<strong>現方針（フォーム／シート）では未使用</strong>（削除しない／アーカイブ扱いは任意）。
-- **方針**：サイト本体は引き続き **`web/`** の Astro で保守する。データは **公開 CSV 中心**、必要に応じ §2.5 の JSON 移行を検討する。**本番は Cloudflare Pages**、<strong>GitHub リポジトリは非公開</strong>（§2.8）。
+- **方針**：サイト本体は **`web/`** の Astro で保守する。データは **公開 CSV 中心**、必要に応じ §2.5 の JSON 移行を検討する。**各自が Cloudflare Pages でホスティング**（§2.8）。
 - **ドキュメント**：**機能・運用の正**は **本ファイルを優先**。旧 `functional-spec` は**歴史的参照**。フォーム再開・規約本文などは確定し次第ここへ追記する。
 
 ---
 
 ## 5. 次の実務ステップ（参考）
 
-1. **掲載用シート**を **§2.2** の列で運用（当面 **手入力**、§2.6）。公開 CSV と **`PUBLIC_EVENTS_CSV_URL`** を **Cloudflare Pages のビルド環境変数**（または移行完了までの CI）に設定する。
-2. **Cloudflare Pages** でプロジェクトを作成し、<strong>非公開 GitHub リポジトリ</strong>を接続する。ビルド設定・**`PUBLIC_EVENTS_CSV_URL`**・**独自ドメイン**を設定し、<strong>push / 必要なら定時ビルド</strong>で本番が更新されることを確認する（§2.8、[README.md](../README.md)）。
+1. **掲載用シート**を **§2.2** の列で運用（当面 **手入力**、§2.6）。公開 CSV と **`PUBLIC_EVENTS_CSV_URL`** を **Cloudflare Pages のビルド環境変数**に設定する。
+2. **Cloudflare Pages** でプロジェクトを作成し、<strong>GitHub リポジトリ（Fork 可）</strong>を接続する。ビルド設定・**`PUBLIC_EVENTS_CSV_URL`**・**独自ドメイン（任意）**を設定し、<strong>push / 必要なら定時ビルド</strong>でサイトが更新されることを確認する（§2.8、[README.md](../README.md)）。
 3. **利用規約**本文・**投稿フォーム** URL が整い次第、`/terms/` の中身とナビのフォームリンクを更新する。
 4. **カテゴリ**は §2.3・`categories.ts` に沿ってシートの選択肢を維持する（追加・改名時はフロントと同期）。
 5. **フォーム受付**を始める場合：**専用 X** 等から案内 → 受付・掲載シートの役割分担を §2.1 に沿って整理する。
@@ -205,4 +209,5 @@
 | 2026-04-14 | データ取得は **当面公開 CSV（手入力テスト可）**、UI 確定後に **JSON 移行を検討**と §2.5・§3 に明記。 |
 | 2026-04-16 | `niconico_url` に **watch 完全 URL または sm/nm 等の ID のみ**を許容、`x_handle` は **`@` なし推奨**を列定義に追記（フロントで正規化）。 |
 | 2026-04-17 | **§2.3** を実装済みフロントに同期。**§2.6** 当面フォームなし・掲載シート手入力。**§2.7** 開催終了・`/` と `/ended/`、静的ビルドの「今日」、GitHub Actions。**§3・§4・§5** を現状に合わせて更新。 |
-| 2026-04-01 | **§2.8** ホスティングを **Cloudflare Pages + GitHub 非公開**に決定（無料・独自ドメイン・`doc/` を公開リポジトリに載せない整理）。§2.7 のデプロイ記述をホスティング非依存に修正。**§3・§4・§5** を追随。 |
+| 2026-07-07 | **§2.8** を **GitHub public・各自ホスティング**に更新。§3・§4・§5 を追随。 |
+| 2026-04-01 | **§2.8** ホスティングを **Cloudflare Pages + GitHub 非公開**に決定。§2.7 のデプロイ記述をホスティング非依存に修正。**§3・§4・§5** を追随。 |

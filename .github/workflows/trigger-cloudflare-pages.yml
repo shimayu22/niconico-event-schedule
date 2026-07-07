@@ -1,7 +1,8 @@
-# Cloudflare Pages の Deploy Hook を叩き、本番ビルドだけ再実行する（git に新コミットがなくても可）。
+# Cloudflare Pages の Deploy Hook を叩き、ビルドだけ再実行する（git に新コミットがなくても可）。
+# 各自の Pages プロジェクト用に Deploy Hook を作成し、自分のリポジトリ Secret に登録する。
 #
 # セットアップ:
-#   1. Cloudflare: Pages プロジェクト → Settings → Builds → Deploy hooks でフックを作成（branch: main）
+#   1. Cloudflare: 自分の Pages プロジェクト → Settings → Builds → Deploy hooks（branch: main）
 #   2. GitHub: リポジトリ → Settings → Secrets and variables → Actions
 #      → New repository secret → Name: CLOUDFLARE_PAGES_DEPLOY_HOOK_URL
 #      → Secret: フックの URL をコピーして貼り付け
