@@ -30,3 +30,6 @@ yarn-error.log*
 # Supabase local (optional)
 .branches
 .temp
+
+doc/daily
+doc/private
